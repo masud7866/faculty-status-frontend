@@ -13,11 +13,11 @@ fetch("https://faculty-status-backend.onrender.com/api/faculty", { credentials: 
         <div>
           <label>${f.name}</label>
           <select id="status-${i}">
-            <option value="in_class">In Class</option>
-            <option value="at_dept">At Department</option>
-            <option value="on_leave">On Leave</option>
-            <option value="off_duty">Off Duty</option>
-            <option value="in_meeting">In Meeting</option>
+            <option value="in_class" ${f.status === "in_class" ? "selected" : ""}>In Class</option>
+            <option value="at_dept" ${f.status === "at_dept" ? "selected" : ""}>At Department</option>
+            <option value="on_leave" ${f.status === "on_leave" ? "selected" : ""}>On Leave</option>
+            <option value="off_duty" ${f.status === "off_duty" ? "selected" : ""}>Off Duty</option>
+            <option value="in_meeting" ${f.status === "in_meeting" ? "selected" : ""}>In Meeting</option>
           </select>
         </div><br>`;
     });
