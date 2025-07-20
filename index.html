@@ -34,7 +34,7 @@
           data.forEach(f => {
             grid.innerHTML += `
               <div class="card">
-                <img src="https://faculty-status-backend.onrender.com${f.public}" alt="${f.name}">
+                <img src="https://faculty-status-backend.onrender.com${f.image}" alt="${f.name}">
                 <h3>${f.name}</h3>
                 <div class="status ${f.status}">${STATUS_MAP[f.status]}</div>
               </div>`;
