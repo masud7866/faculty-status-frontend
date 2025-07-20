@@ -26,7 +26,7 @@
       off_duty: "Off Duty", in_meeting: "In Meeting"
     };
     function loadFaculty() {
-      fetch("https://faculty-status-backend.onrender.com/api/status", { credentials: "include" })
+      fetch("https://faculty-status-backend.onrender.com/api/faculty", { credentials: "include" })
         .then(res => res.json())
         .then(data => {
           const grid = document.getElementById("grid");
