@@ -3,7 +3,7 @@
 <button onclick="submit()">Update</button>
 <script>
 let facultyData = [];
-fetch("https://faculty-status-api.onrender.com/faculty", { credentials: "include" })
+fetch("https://faculty-status-backend.onrender.com/faculty", { credentials: "include" })
   .then(res => res.json())
   .then(data => {
     facultyData = data;
