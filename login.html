@@ -1,25 +1,130 @@
-<h2>Login</h2>
-<form onsubmit="login(event)">
-  <input type="text" id="user" placeholder="Username" required><br>
-  <input type="password" id="pass" placeholder="Password" required><br>
-  <button type="submit">Login</button>
-</form>
-<script>
-function login(e) {
-  e.preventDefault();
-  fetch("https://faculty-status-backend.onrender.com/api/login", {
-    method: "POST",
-    credentials: "include",
-    headers: {
-    "Content-Type": "application/json"
-  },
-    body: JSON.stringify({
-      username: document.getElementById('user').value,
-      password: document.getElementById('pass').value
-    })
-  }).then(res => {
-    if (res.ok) window.location.href = 'control.html';
-    else alert("Login failed");
-  });
-}
-</script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Login</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f3f4f6;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .login-container {
+      background: white;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 400px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #1f2937;
+      margin-bottom: 1.5rem;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: bold;
+    }
+
+    input {
+      width: 100%;
+      padding: 0.6rem;
+      margin-bottom: 1.5rem;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+
+    button {
+      width: 100%;
+      padding: 0.75rem;
+      font-size: 1rem;
+      background-color: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #1d4ed8;
+    }
+
+    .message {
+      margin-top: 1rem;
+      text-align: center;
+      font-size: 0.95rem;
+    }
+
+    .error {
+      color: #dc2626;
+    }
+
+    .success {
+      color: #16a34a;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-container">
+    <h2>Admin Login</h2>
+    <label for="username">Username</label>
+    <input type="text" id="username" placeholder="Enter username" required>
+    
+    <label for="password">Password</label>
+    <input type="password" id="password" placeholder="Enter password" required>
+    
+    <button onclick="login()">Login</button>
+    <div class="message" id="message"></div>
+  </div>
+
+  <script>
+    function login() {
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value.trim();
+      const msg = document.getElementById("message");
+      msg.textContent = "";
+
+      if (!username || !password) {
+        msg.textContent = "Please enter both fields.";
+        msg.className = "message error";
+        return;
+      }
+
+      fetch("https://faculty-status-backend.onrender.com/api/login", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ username, password })
+      }).then(res => {
+        if (res.ok) {
+          msg.textContent = "Login successful! Redirecting...";
+          msg.className = "message success";
+          setTimeout(() => {
+            window.location.href = "control.html";
+          }, 1000);
+        } else {
+          msg.textContent = "Invalid username or password.";
+          msg.className = "message error";
+        }
+      }).catch(err => {
+        msg.textContent = "Network error. Try again.";
+        msg.className = "message error";
+      });
+    }
+  </script>
+
+</body>
+</html>
