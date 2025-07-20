@@ -3,7 +3,7 @@
 <button onclick="submit()">Update</button>
 <script>
 let facultyData = [];
-fetch("https://faculty-status-backend.onrender.com/faculty", { credentials: "include" })
+fetch("https://faculty-status-backend.onrender.com/api/status", { credentials: "include" })
   .then(res => res.json())
   .then(data => {
     facultyData = data;
@@ -28,7 +28,7 @@ function submit() {
     ...f,
     status: document.getElementById(`status-${i}`).value
   }));
-  fetch("https://faculty-status-backend.onrender.com/update", {
+  fetch("https://faculty-status-backend.onrender.com/api/update", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
