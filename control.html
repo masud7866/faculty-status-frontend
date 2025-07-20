@@ -32,7 +32,7 @@ function submit() {
     method: "POST",
     credentials: "include",
     headers: { "Content-Type": "application/json" },    
-    body: JSON.stringify(updatedStatuses)
+    body: JSON.stringify(updated)
   }).then(res => {
     if (res.ok) alert("Updated");
     else alert("Update failed");
