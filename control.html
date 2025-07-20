@@ -1,0 +1,41 @@
+<h2>Control Panel</h2>
+<div id="controls"></div>
+<button onclick="submit()">Update</button>
+<script>
+let facultyData = [];
+fetch("https://faculty-status-api.onrender.com/faculty", { credentials: "include" })
+  .then(res => res.json())
+  .then(data => {
+    facultyData = data;
+    const controls = document.getElementById('controls');
+    data.forEach((f, i) => {
+      controls.innerHTML += `
+        <div>
+          <label>${f.name}</label>
+          <select id="status-${i}">
+            <option value="in_class">In Class</option>
+            <option value="at_dept">At Department</option>
+            <option value="on_leave">On Leave</option>
+            <option value="off_duty">Off Duty</option>
+            <option value="in_meeting">In Meeting</option>
+          </select>
+        </div><br>`;
+    });
+  });
+
+function submit() {
+  const updated = facultyData.map((f, i) => ({
+    ...f,
+    status: document.getElementById(`status-${i}`).value
+  }));
+  fetch("https://faculty-status-api.onrender.com/update", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(updated)
+  }).then(res => {
+    if (res.ok) alert("Updated");
+    else alert("Update failed");
+  });
+}
+</script>
