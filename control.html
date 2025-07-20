@@ -28,7 +28,7 @@ function submit() {
     ...f,
     status: document.getElementById(`status-${i}`).value
   }));
-  fetch("https://faculty-status-api.onrender.com/update", {
+  fetch("https://faculty-status-backend.onrender.com/update", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
