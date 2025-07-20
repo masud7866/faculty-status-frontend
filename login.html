@@ -9,7 +9,6 @@ function login(e) {
   e.preventDefault();
   fetch("https://faculty-status-backend.onrender.com/api/login", {
     method: "POST",
-    headers: {"Content-Type": "application/json"},
     credentials: "include",
     headers: {
     "Content-Type": "application/json"
