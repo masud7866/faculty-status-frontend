@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Faculty Whereabouts</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet" />
   <style>
     body {
       margin: 0;
@@ -47,20 +47,6 @@
       text-shadow: 1px 1px 2px #00000055;
     }
 
-    #clock {
-      font-size: 1.8vh;
-      font-family: 'Orbitron', sans-serif;
-      color: #ffffff;
-      white-space: nowrap;
-      animation: pulse 1.5s infinite ease-in-out;
-      padding-left: 1vw;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.7; }
-    }
-
     .grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -68,59 +54,58 @@
       gap: 1vh;
       padding: 1vh 2vw;
       box-sizing: border-box;
-      height: calc(100vh - 8vh); /* Remaining height after header */
+      height: calc(100vh - 7vh); /* header height subtracted */
     }
 
-   .card {
-  background: white;
-  border-radius: 1vh;
-  padding: 1.2vh 0.8vh;
-  box-shadow: 0 0 6px rgba(0,0,0,0.15);
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-around;
-  font-size: 1.6vh;
-  overflow: hidden;
-  word-break: break-word;
-  box-sizing: border-box;
-}
+    .card {
+      background: white;
+      border-radius: 1vh;
+      padding: 1.2vh 0.8vh;
+      box-shadow: 0 0 6px rgba(0,0,0,0.15);
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-around;
+      font-size: 1.6vh;
+      overflow: hidden;
+      word-break: break-word;
+      box-sizing: border-box;
+    }
 
-.card img {
-  width: 6vh;
-  height: 6vh;
-  border-radius: 50%;
-  object-fit: cover;
-  margin-bottom: 0.5vh;
-}
+    .card img {
+      width: 6vh;
+      height: 6vh;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 0.5vh;
+    }
 
-.card h3 {
-  margin: 0.3vh 0 0.2vh;
-  font-size: 2vh;
-  font-weight: 600;
-}
+    .card h3 {
+      margin: 0.3vh 0 0.2vh;
+      font-size: 2vh;
+      font-weight: 600;
+    }
 
-.card div {
-  margin: 0.3vh 0;
-  line-height: 1.4;
-  font-size: 1.6vh;
-  word-break: break-word;
-  max-width: 95%;
-  overflow-wrap: break-word;
-}
+    .card div {
+      margin: 0.3vh 0;
+      line-height: 1.4;
+      font-size: 1.6vh;
+      word-break: break-word;
+      max-width: 95%;
+      overflow-wrap: break-word;
+    }
 
-.status {
-  display: inline-block;
-  margin-top: 0.5vh;
-  padding: 0.4vh 0.8vh;
-  border-radius: 6px;
-  color: white;
-  font-weight: bold;
-  font-size: 1.5vh;
-  letter-spacing: 0.3px;
-}
-
+    .status {
+      display: inline-block;
+      margin-top: 0.5vh;
+      padding: 0.4vh 0.8vh;
+      border-radius: 6px;
+      color: white;
+      font-weight: bold;
+      font-size: 1.5vh;
+      letter-spacing: 0.3px;
+    }
 
     .in_class { background-color: #007bff; }
     .at_dept { background-color: #28a745; }
@@ -128,23 +113,47 @@
     .off_duty { background-color: #6c757d; }
     .in_meeting { background-color: #fd7e14; }
 
+    /* Clock card styling */
+    .clock-card {
+      grid-column: span 2;      /* span 2 columns */
+      grid-row: 4;              /* fixed to last row */
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      color: #00f0ff;
+      font-family: 'Orbitron', monospace;
+      font-size: 4vh;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 1vh;
+      box-shadow:
+        0 0 10px #00f0ff88,
+        0 0 30px #00f0ff55,
+        inset 0 0 10px #00f0ff99;
+      letter-spacing: 3px;
+      user-select: none;
+      text-shadow:
+        0 0 10px #00e0ffcc,
+        0 0 20px #00c0ffbb;
+    }
+
     @media (max-width: 1000px) {
       .grid {
         grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
         grid-template-rows: auto;
+        height: auto;
       }
     }
   </style>
 </head>
 <body>
   <header>
-    <img src="images/ugv_logo.png" alt="UGV Logo" class="logo">
+    <img src="images/ugv_logo.png" alt="UGV Logo" class="logo" />
     <div class="header-center">
       <h1>Department of Computer Science & Engineering</h1>
       <h2>University of Global Village</h2>
     </div>
-    <div id="clock"></div>
-    <img src="images/cse_logo.png" alt="CSE Logo" class="logo">
+    <img src="images/cse_logo.png" alt="CSE Logo" class="logo" />
   </header>
 
   <div id="grid" class="grid"></div>
@@ -164,6 +173,7 @@
         .then(data => {
           const grid = document.getElementById("grid");
           grid.innerHTML = "";
+
           data.forEach(f => {
             grid.innerHTML += `
               <div class="card">
@@ -175,17 +185,20 @@
                 <div class="status ${f.status}">${STATUS_MAP[f.status]}</div>
               </div>`;
           });
+
+          // Add clock card spanning 2 columns
+          grid.innerHTML += `<div id="clock" class="clock-card"></div>`;
         });
     }
 
     function updateClock() {
       const now = new Date();
       const clock = document.getElementById("clock");
-      clock.textContent = now.toLocaleTimeString();
+      if (clock) clock.textContent = now.toLocaleTimeString();
     }
 
     loadFaculty();
-    setInterval(loadFaculty, 3000);
+    setInterval(loadFaculty, 15000);
     updateClock();
     setInterval(updateClock, 1000);
   </script>
