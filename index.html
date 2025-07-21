@@ -159,3 +159,28 @@
           grid.innerHTML = "";
           data.forEach(f => {
             grid.innerHTML += `
+              <div class="card">
+                <img src="https://faculty-status-backend.onrender.com${f.image}" alt="${f.name}">
+                <h3>${f.name}</h3>
+                <div>${f.designation || ""}</div>
+                <div>${f.contact || ""}</div>
+                <div>${f.email || ""}</div>
+                <div class="status ${f.status}">${STATUS_MAP[f.status]}</div>
+              </div>`;
+          });
+        });
+    }
+
+    function updateClock() {
+      const now = new Date();
+      const clock = document.getElementById("clock");
+      clock.textContent = now.toLocaleTimeString();
+    }
+
+    loadFaculty();
+    setInterval(loadFaculty, 15000);
+    updateClock();
+    setInterval(updateClock, 1000);
+  </script>
+</body>
+</html>
