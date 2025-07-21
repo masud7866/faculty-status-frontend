@@ -108,23 +108,22 @@
   <script>
     // Redirect if already logged in
 document.addEventListener("DOMContentLoaded", () => {
-  fetch("https://faculty-status-backend.onrender.com/api/faculty", {
+  fetch("https://faculty-status-backend.onrender.com/api/check-login", {
     credentials: "include"
   })
   .then(res => {
-    if (!res.ok) return;
+    if (!res.ok) throw new Error("Not logged in");
     return res.json();
   })
   .then(data => {
-    if (Array.isArray(data)) {
+    if (data.loggedIn) {
       window.location.href = "control.html";
     }
   })
-  .catch(() => {
-    // Ignore
+  .catch(err => {
+    console.log("Not logged in");
   });
 });
-
 
     document.getElementById("loginForm").addEventListener("submit", function (e) {
       e.preventDefault();
