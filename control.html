@@ -115,6 +115,10 @@
         body: JSON.stringify(facultyData)
       }).then(res => {
         if (res.ok) showMessage("Status updated.");
+         else if (res.status === 403) {
+  alert("Session expired. Redirecting to login...");
+  window.location.href = "login.html";
+}
         else showMessage("Failed to update.", true);
       }).catch(() => showMessage("Network error", true));
     }
