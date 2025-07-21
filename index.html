@@ -5,124 +5,102 @@
   <title>Faculty Status Display</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    html, body {
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
       margin: 0;
       padding: 0;
       font-family: "Segoe UI", sans-serif;
-      background-color: #111827;
-      color: #f9fafb;
+      background-color: #f0f4f8;
+      color: #1f2937;
     }
 
-    h1 {
+    header {
+      background-color: #2563eb;
+      color: white;
+      padding: 1rem;
       text-align: center;
-      font-size: 3vw;
-      margin: 2vh 0;
-      color: #10b981;
+      font-size: 1.5rem;
     }
 
-    .grid {
+    .faculty-list {
       display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
       gap: 1rem;
       padding: 1rem;
     }
 
-    /* Grid responsive: 2 columns on phones, more on wide screens */
-    @media (max-width: 599px) {
-      .grid {
-        grid-template-columns: repeat(1, 1fr);
-      }
-    }
-
-    @media (min-width: 600px) and (max-width: 1023px) {
-      .grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-
-    @media (min-width: 1024px) {
-      .grid {
-        grid-template-columns: repeat(3, 1fr);
-      }
-    }
-
-    .card {
-      background-color: #1f2937;
+    .faculty-card {
+      background-color: #ffffff;
       border-radius: 12px;
-      padding: 1.5rem;
+      padding: 1rem;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
       text-align: center;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-      transition: transform 0.3s;
     }
 
-    .card:hover {
-      transform: scale(1.02);
+    .faculty-card img {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 1rem;
     }
 
-    .name {
-      font-size: 2vw;
-      font-weight: bold;
-      color: #facc15;
+    .faculty-name {
+      font-size: 1.1rem;
+      font-weight: 600;
     }
 
-    .status {
-      margin-top: 0.8rem;
-      font-size: 1.6vw;
-      font-weight: 500;
+    .faculty-status {
+      margin-top: 0.5rem;
+      font-size: 0.95rem;
+      color: #374151;
     }
 
-    .in_class { color: #22c55e; }
-    .at_dept { color: #3b82f6; }
-    .on_leave { color: #f87171; }
-    .off_duty { color: #9ca3af; }
-    .in_meeting { color: #f59e0b; }
+    @media screen and (max-width: 600px) {
+      header {
+        font-size: 1.2rem;
+      }
+
+      .faculty-card img {
+        width: 80px;
+        height: 80px;
+      }
+    }
   </style>
 </head>
 <body>
-
-  <h1>Faculty Status</h1>
-  <div class="grid" id="facultyContainer"></div>
+  <header>
+    Faculty Status Display
+  </header>
+  <div class="faculty-list" id="facultyList"></div>
 
   <script>
-    const labels = {
-      in_class: "In Class",
-      at_dept: "At Department",
-      on_leave: "On Leave",
-      off_duty: "Off Duty",
-      in_meeting: "In Meeting"
-    };
-
-    function render(faculties) {
-      const container = document.getElementById("facultyContainer");
-      container.innerHTML = "";
-
-      faculties.forEach(f => {
-        const card = document.createElement("div");
-        card.className = "card";
-
-        const name = document.createElement("div");
-        name.className = "name";
-        name.textContent = f.name;
-
-        const status = document.createElement("div");
-        status.className = "status " + f.status;
-        status.textContent = labels[f.status] || "Unknown";
-
-        card.appendChild(name);
-        card.appendChild(status);
-        container.appendChild(card);
+    fetch("https://faculty-status-backend.onrender.com/api/faculty")
+      .then(res => res.json())
+      .then(data => {
+        const list = document.getElementById("facultyList");
+        list.innerHTML = data.map(f => `
+          <div class="faculty-card">
+            <img src="https://faculty-status-backend.onrender.com/images/${f.image}" alt="${f.name}" onerror="this.src='https://via.placeholder.com/100'">
+            <div class="faculty-name">${f.name}</div>
+            <div class="faculty-status">${formatStatus(f.status)}</div>
+          </div>
+        `).join("");
       });
-    }
 
-    function loadData() {
-      fetch("https://faculty-status-backend.onrender.com/api/faculty")
-        .then(res => res.json())
-        .then(data => render(data))
-        .catch(err => console.error("Failed to fetch faculty:", err));
+    function formatStatus(status) {
+      switch (status) {
+        case "in_class": return "📚 In Class";
+        case "at_dept": return "🏢 At Department";
+        case "on_leave": return "🌴 On Leave";
+        case "off_duty": return "🚪 Off Duty";
+        case "in_meeting": return "📌 In Meeting";
+        default: return "Status Unknown";
+      }
     }
-
-    loadData();
-    setInterval(loadData, 10000); // Refresh every 10 seconds
   </script>
-
 </body>
 </html>
