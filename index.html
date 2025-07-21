@@ -9,19 +9,56 @@
       font-family: sans-serif;
       background-color: #f4f4f4;
       margin: 0;
-      padding: 2rem;
-      zoom: 1.2;
+      padding: 0;
     }
 
-    h1 {
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: #ffffffee;
+      padding: 0.5rem 1rem;
+      border-bottom: 2px solid #003366;
+      position: relative;
+    }
+
+    header img {
+      height: 60px;
+      width: auto;
+    }
+
+    .title {
       text-align: center;
-      margin-bottom: 1.5rem;
+      flex: 1;
+    }
+
+    .title span:first-child {
+      color: #003366;
+      font-size: 1.6rem;
+      font-weight: 700;
+    }
+
+    .title span:last-child {
+      color: #444;
+      font-size: 1.1rem;
+      font-weight: 500;
+    }
+
+    .clock {
+      font-size: 1rem;
+      color: #003366;
+      font-weight: bold;
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
     }
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-      gap: 0.5rem;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1rem;
+      padding: 1rem;
     }
 
     .card {
@@ -41,106 +78,71 @@
     }
 
     .card h3 {
-      margin: 0.3rem 0;
+      margin: 0.3rem 0 0.2rem;
+      font-size: 1.1rem;
+      color: #222;
     }
 
     .card p {
       margin: 0.2rem 0;
-      font-size: 0.9rem;
-      color: #333;
+      font-size: 0.85rem;
+      color: #555;
     }
 
     .status {
       display: inline-block;
-      margin: 0.5rem 0;
+      margin-top: 0.5rem;
       padding: 0.3rem 0.6rem;
       border-radius: 5px;
       color: white;
       font-weight: bold;
+      font-size: 0.85rem;
     }
 
-    .in_class   { background-color: #007bff; }
-    .at_dept    { background-color: #28a745; }
-    .on_leave   { background-color: #dc3545; }
-    .off_duty   { background-color: #6c757d; }
+    .in_class { background-color: #007bff; }
+    .at_dept { background-color: #28a745; }
+    .on_leave { background-color: #dc3545; }
+    .off_duty { background-color: #6c757d; }
     .in_meeting { background-color: #fd7e14; }
 
-    .header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background-color: white;
-  padding: 1rem;
-  border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-  margin-bottom: 1rem;
-  flex-wrap: wrap;
-}
-
-.logo {
-  width: 80px;
-  height: auto;
-}
-
-.logo.left {
-  order: 1;
-}
-
-.logo.right {
-  order: 3;
-}
-
-.title {
-  flex: 1;
-  text-align: center;
-  order: 2;
-}
-
-.title h1 {
-  margin: 0;
-  font-size: 1.5rem;
-  color: #333;
-}
-
-.title h2 {
-  margin: 0;
-  font-size: 1rem;
-  color: #555;
-}
-
-@media (max-width: 600px) {
-  .header {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .logo {
-    margin-bottom: 0.5rem;
-  }
-
-  .title h1 {
-    font-size: 1.2rem;
-  }
-
-  .title h2 {
-    font-size: 0.9rem;
-  }
-}
+    @media (max-width: 600px) {
+      header img {
+        height: 40px;
+      }
+      .title span:first-child {
+        font-size: 1.2rem;
+      }
+      .title span:last-child {
+        font-size: 0.9rem;
+      }
+      .clock {
+        font-size: 0.85rem;
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="header">
-  <img src="/images/ugv_logo.png" alt="UGV Logo" class="logo left">
-  <div class="title">
-    <h1>Department of Computer Science and Engineering</h1>
-    <h2>University of Global Village (UGV)</h2>
-  </div>
-  <img src="/images/cse_logo.png" alt="CSE Logo" class="logo right">
-</div>
+  <header>
+    <img src="ugv_logo.png" alt="UGV Logo" />
+    <div class="title">
+      <span>Department of Computer Science & Engineering</span><br>
+      <span>University of Global Village (UGV), Barishal</span>
+    </div>
+    <img src="cse_logo.png" alt="CSE Logo" />
+    <div class="clock" id="clock"></div>
+  </header>
 
   <div id="grid" class="grid"></div>
 
   <script>
+    function updateClock() {
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      document.getElementById('clock').textContent = timeStr;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
     const STATUS_MAP = {
       in_class: "In Class",
       at_dept: "At Department",
@@ -160,10 +162,10 @@
               <div class="card">
                 <img src="https://faculty-status-backend.onrender.com${f.image}" alt="${f.name}">
                 <h3>${f.name}</h3>
-                <p><strong>${f.designation || "Designation not available"}</strong></p>
+                <p><strong>${f.designation || ''}</strong></p>
+                <p>${f.contact || ''}</p>
+                <p>${f.email || ''}</p>
                 <div class="status ${f.status}">${STATUS_MAP[f.status]}</div>
-                <p>📞 ${f.contact || "N/A"}</p>
-                <p>📧 ${f.email || "N/A"}</p>
               </div>`;
           });
         });
