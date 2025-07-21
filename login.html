@@ -2,31 +2,38 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Admin Login</title>
+  <title>Faculty Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      background: #f3f4f6;
+      margin: 0;
+      padding: 0;
+      font-family: "Segoe UI", sans-serif;
+      background-color: #1e293b;
+      color: #f9fafb;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
-      margin: 0;
     }
 
-    .login-container {
-      background: white;
+    .login-box {
+      background-color: #334155;
       padding: 2rem;
       border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
       width: 100%;
       max-width: 400px;
     }
 
     h2 {
       text-align: center;
-      color: #1f2937;
       margin-bottom: 1.5rem;
+      color: #10b981;
     }
 
     label {
@@ -35,12 +42,13 @@
       font-weight: bold;
     }
 
-    input {
+    input[type="text"],
+    input[type="password"] {
       width: 100%;
-      padding: 0.6rem;
-      margin-bottom: 1.5rem;
+      padding: 0.75rem;
+      margin-bottom: 1rem;
+      border: none;
       border-radius: 6px;
-      border: 1px solid #ccc;
       font-size: 1rem;
     }
 
@@ -48,80 +56,74 @@
       width: 100%;
       padding: 0.75rem;
       font-size: 1rem;
-      background-color: #2563eb;
+      background-color: #10b981;
       color: white;
       border: none;
       border-radius: 6px;
       cursor: pointer;
+      transition: background-color 0.2s ease;
     }
 
     button:hover {
-      background-color: #1d4ed8;
-    }
-
-    .message {
-      margin-top: 1rem;
-      text-align: center;
-      font-size: 0.95rem;
+      background-color: #059669;
     }
 
     .error {
-      color: #dc2626;
-    }
-
-    .success {
-      color: #16a34a;
+      color: #f87171;
+      margin-top: 1rem;
+      text-align: center;
     }
   </style>
 </head>
 <body>
 
-  <div class="login-container">
-    <h2>Admin Login</h2>
-    <label for="username">Username</label>
-    <input type="text" id="username" placeholder="Enter username" required>
-    
-    <label for="password">Password</label>
-    <input type="password" id="password" placeholder="Enter password" required>
-    
-    <button onclick="login()">Login</button>
-    <div class="message" id="message"></div>
+  <div class="login-box">
+    <h2>Faculty Control Login</h2>
+    <form onsubmit="login(event)">
+      <label>Username</label>
+      <input type="text" id="username" required>
+
+      <label>Password</label>
+      <input type="password" id="password" required>
+
+      <button type="submit">Login</button>
+    </form>
+    <div class="error" id="errorMsg"></div>
   </div>
 
   <script>
-    function login() {
+    // Check login status
+    fetch("https://faculty-status-backend.onrender.com/api/faculty", {
+      credentials: "include"
+    })
+    .then(res => {
+      if (res.ok) {
+        // Already logged in
+        window.location.href = "control.html";
+      }
+    });
+
+    function login(event) {
+      event.preventDefault();
+
       const username = document.getElementById("username").value.trim();
       const password = document.getElementById("password").value.trim();
-      const msg = document.getElementById("message");
-      msg.textContent = "";
-
-      if (!username || !password) {
-        msg.textContent = "Please enter both fields.";
-        msg.className = "message error";
-        return;
-      }
 
       fetch("https://faculty-status-backend.onrender.com/api/login", {
         method: "POST",
         credentials: "include",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password })
-      }).then(res => {
+      })
+      .then(res => {
         if (res.ok) {
-          msg.textContent = "Login successful! Redirecting...";
-          msg.className = "message success";
-          setTimeout(() => {
-            window.location.href = "control.html";
-          }, 1000);
+          window.location.href = "control.html";
         } else {
-          msg.textContent = "Invalid username or password.";
-          msg.className = "message error";
+          document.getElementById("errorMsg").textContent = "Invalid credentials!";
         }
-      }).catch(err => {
-        msg.textContent = "Network error. Try again.";
-        msg.className = "message error";
+      })
+      .catch(() => {
+        document.getElementById("errorMsg").textContent = "Login failed. Try again.";
       });
     }
   </script>
