@@ -5,48 +5,55 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Faculty Whereabouts</title>
   <style>
-    html, body {
+    body {
+      font-family: sans-serif;
+      background-color: #f4f4f4;
       margin: 0;
       padding: 0;
-      background: #f0f0f0;
-      font-family: Arial, sans-serif;
-      overflow: hidden;
     }
 
     header {
-      background: #003366;
-      color: white;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0.5rem 1rem;
-      height: 10vh;
-      box-sizing: border-box;
+      background: #e0e0e0;
+      padding: 1vh 2vw;
+      border-bottom: 2px solid #ccc;
     }
 
-    header img {
-      height: 7vh;
+    .logo {
+      height: 6vh;
     }
 
     .header-center {
       text-align: center;
-      font-size: 2.2vh;
-      font-weight: bold;
-      line-height: 1.3;
+      flex: 1;
     }
 
-    .clock {
-      font-size: 1.5vh;
+    .header-center h1 {
+      margin: 0;
+      font-size: 2.6vh;
       font-weight: bold;
+      color: #333;
+    }
+
+    .header-center h2 {
+      margin: 0;
+      font-size: 2vh;
+      color: #666;
+    }
+
+    #clock {
+      font-size: 2vh;
+      color: #333;
+      white-space: nowrap;
     }
 
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(12vw, 1fr));
-      grid-auto-rows: 42vh;
       gap: 1vh;
       padding: 1vh;
-      height: 90vh;
       box-sizing: border-box;
     }
 
@@ -58,32 +65,30 @@
       text-align: center;
       display: flex;
       flex-direction: column;
-      justify-content: flex-start;
       align-items: center;
       font-size: 1.8vh;
+      height: auto;
+      align-self: start;
     }
 
     .card img {
-      width: 7vh;
-      height: 7vh;
+      width: 6vh;
+      height: 6vh;
       border-radius: 50%;
       object-fit: cover;
-      margin-bottom: 0.5vh;
-    }
-
-    .card h3 {
-      margin: 0.3vh 0;
-      font-size: 2vh;
-    }
-
-    .card div {
       margin-bottom: 0.3vh;
     }
 
+    .card h3 {
+      margin: 0.3vh 0 0;
+      font-size: 2vh;
+    }
+
     .status {
-      margin-top: 0.5vh;
-      padding: 0.2vh 0.6vh;
-      border-radius: 0.5vh;
+      display: inline-block;
+      margin-top: 0.3vh;
+      padding: 0.3vh 0.6vh;
+      border-radius: 5px;
       color: white;
       font-weight: bold;
       font-size: 1.5vh;
@@ -94,36 +99,17 @@
     .on_leave { background-color: #dc3545; }
     .off_duty { background-color: #6c757d; }
     .in_meeting { background-color: #fd7e14; }
-
-    @media (max-width: 1024px) {
-      .grid {
-        grid-template-columns: repeat(4, 1fr);
-        grid-auto-rows: 45vh;
-      }
-    }
-
-    @media (max-width: 768px) {
-      .grid {
-        grid-template-columns: repeat(2, 1fr);
-        grid-auto-rows: 47vh;
-      }
-
-      .header-center {
-        font-size: 1.5vh;
-      }
-    }
   </style>
 </head>
 <body>
   <header>
-    <img src="images/ugv_logo.png" alt="UGV Logo">
+    <img src="images/ugv_logo.png" alt="UGV Logo" class="logo">
     <div class="header-center">
-      Department of CSE<br>University of Global Village
+      <h1>Department of CSE</h1>
+      <h2>University of Global Village</h2>
     </div>
-    <div class="header-right">
-      <div class="clock" id="clock"></div>
-      <img src="images/cse_logo.png" alt="CSE Logo">
-    </div>
+    <div id="clock"></div>
+    <img src="images/cse_logo.png" alt="CSE Logo" class="logo">
   </header>
 
   <div id="grid" class="grid"></div>
@@ -138,9 +124,7 @@
     };
 
     function loadFaculty() {
-      fetch("https://faculty-status-backend.onrender.com/api/faculty", {
-        credentials: "include"
-      })
+      fetch("https://faculty-status-backend.onrender.com/api/faculty", { credentials: "include" })
         .then(res => res.json())
         .then(data => {
           const grid = document.getElementById("grid");
@@ -153,23 +137,22 @@
                 <div>${f.designation || ""}</div>
                 <div>${f.contact || ""}</div>
                 <div>${f.email || ""}</div>
-                <div class="status ${f.status}">${STATUS_MAP[f.status] || "Unknown"}</div>
-              </div>
-            `;
+                <div class="status ${f.status}">${STATUS_MAP[f.status]}</div>
+              </div>`;
           });
         });
     }
 
     function updateClock() {
       const now = new Date();
-      const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-      document.getElementById("clock").textContent = timeStr;
+      const clock = document.getElementById("clock");
+      clock.textContent = now.toLocaleTimeString();
     }
 
     loadFaculty();
-    setInterval(loadFaculty, 15000); // Refresh every 15s
+    setInterval(loadFaculty, 15000);
     updateClock();
-    setInterval(updateClock, 1000); // Clock every second
+    setInterval(updateClock, 1000);
   </script>
 </body>
 </html>
