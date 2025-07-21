@@ -1,48 +1,128 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Faculty Whereabouts</title>
+  <meta charset="UTF-8">
+  <title>Faculty Status Display</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { font-family: sans-serif; background-color: #f4f4f4; margin: 0; padding: 2rem; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; }
-    .card { background: white; padding: 1rem; border-radius: 10px; text-align: center; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-    .card img { width: 100px; height: 100px; object-fit: cover; border-radius: 50%; }
-    .status { display: inline-block; margin-top: 0.5rem; padding: 0.3rem 0.6rem; border-radius: 5px; color: white; font-weight: bold; }
-    .in_class { background-color: #007bff; }
-    .at_dept { background-color: #28a745; }
-    .on_leave { background-color: #dc3545; }
-    .off_duty { background-color: #6c757d; }
-    .in_meeting { background-color: #fd7e14; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: "Segoe UI", sans-serif;
+      background-color: #111827;
+      color: #f9fafb;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 3vw;
+      margin: 2vh 0;
+      color: #10b981;
+    }
+
+    .grid {
+      display: grid;
+      gap: 1rem;
+      padding: 1rem;
+    }
+
+    /* Grid responsive: 2 columns on phones, more on wide screens */
+    @media (max-width: 599px) {
+      .grid {
+        grid-template-columns: repeat(1, 1fr);
+      }
+    }
+
+    @media (min-width: 600px) and (max-width: 1023px) {
+      .grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .card {
+      background-color: #1f2937;
+      border-radius: 12px;
+      padding: 1.5rem;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+      transition: transform 0.3s;
+    }
+
+    .card:hover {
+      transform: scale(1.02);
+    }
+
+    .name {
+      font-size: 2vw;
+      font-weight: bold;
+      color: #facc15;
+    }
+
+    .status {
+      margin-top: 0.8rem;
+      font-size: 1.6vw;
+      font-weight: 500;
+    }
+
+    .in_class { color: #22c55e; }
+    .at_dept { color: #3b82f6; }
+    .on_leave { color: #f87171; }
+    .off_duty { color: #9ca3af; }
+    .in_meeting { color: #f59e0b; }
   </style>
 </head>
 <body>
-  <h1>Faculty Whereabouts</h1>
-  <div id="grid" class="grid"></div>
+
+  <h1>Faculty Status</h1>
+  <div class="grid" id="facultyContainer"></div>
+
   <script>
-    const STATUS_MAP = {
-      in_class: "In Class", at_dept: "At Department", on_leave: "On Leave",
-      off_duty: "Off Duty", in_meeting: "In Meeting"
+    const labels = {
+      in_class: "In Class",
+      at_dept: "At Department",
+      on_leave: "On Leave",
+      off_duty: "Off Duty",
+      in_meeting: "In Meeting"
     };
-    function loadFaculty() {
-      fetch("https://faculty-status-backend.onrender.com/api/faculty", { credentials: "include" })
-        .then(res => res.json())
-        .then(data => {
-          const grid = document.getElementById("grid");
-          grid.innerHTML = "";
-          data.forEach(f => {
-            grid.innerHTML += `
-              <div class="card">
-                <img src="https://faculty-status-backend.onrender.com${f.image}" alt="${f.name}">
-                <h3>${f.name}</h3>
-                <div class="status ${f.status}">${STATUS_MAP[f.status]}</div>
-              </div>`;
-          });
-        });
+
+    function render(faculties) {
+      const container = document.getElementById("facultyContainer");
+      container.innerHTML = "";
+
+      faculties.forEach(f => {
+        const card = document.createElement("div");
+        card.className = "card";
+
+        const name = document.createElement("div");
+        name.className = "name";
+        name.textContent = f.name;
+
+        const status = document.createElement("div");
+        status.className = "status " + f.status;
+        status.textContent = labels[f.status] || "Unknown";
+
+        card.appendChild(name);
+        card.appendChild(status);
+        container.appendChild(card);
+      });
     }
-    loadFaculty();
-    setInterval(loadFaculty, 15000);
+
+    function loadData() {
+      fetch("https://faculty-status-backend.onrender.com/api/faculty")
+        .then(res => res.json())
+        .then(data => render(data))
+        .catch(err => console.error("Failed to fetch faculty:", err));
+    }
+
+    loadData();
+    setInterval(loadData, 10000); // Refresh every 10 seconds
   </script>
+
 </body>
 </html>
