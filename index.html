@@ -9,8 +9,9 @@
     body {
       margin: 0;
       padding: 0;
-      font-family: 'Segoe UI', sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background-color: #f5f7fa;
+      overflow-x: hidden;
     }
 
     header {
@@ -27,10 +28,10 @@
     }
 
     .header-center {
-      text-align: center;
       flex: 1;
+      text-align: center;
       color: #ffffff;
-      font-family: 'Orbitron', sans-serif;
+      font-family: 'Orbitron', monospace;
     }
 
     .header-center h1 {
@@ -48,13 +49,14 @@
     }
 
     .grid {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
+      display: flex;
+      flex-wrap: wrap;
       gap: 1vh;
       padding: 1vh 2vw;
       box-sizing: border-box;
-      height: calc(100vh - 7vh); /* header height */
+      height: calc(100vh - 7vh);
       overflow-y: auto;
+      justify-content: flex-start;
     }
 
     .card {
@@ -63,15 +65,17 @@
       padding: 1.2vh 0.8vh;
       box-shadow: 0 0 6px rgba(0,0,0,0.15);
       text-align: center;
+      flex: 1 1 calc(20% - 1vh); /* 5 cards per row */
+      max-width: calc(20% - 1vh);
+      font-size: 1.6vh;
+      min-height: 12vh;
+      box-sizing: border-box;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: space-around;
-      font-size: 1.6vh;
-      overflow: hidden;
+      overflow-wrap: break-word;
       word-break: break-word;
-      box-sizing: border-box;
-      min-height: 12vh;
     }
 
     .card img {
@@ -80,6 +84,7 @@
       border-radius: 50%;
       object-fit: cover;
       margin-bottom: 0.5vh;
+      flex-shrink: 0;
     }
 
     .card h3 {
@@ -92,7 +97,6 @@
       margin: 0.3vh 0;
       line-height: 1.4;
       font-size: 1.6vh;
-      word-break: break-word;
       max-width: 95%;
       overflow-wrap: break-word;
     }
@@ -114,10 +118,7 @@
     .off_duty { background-color: #6c757d; }
     .in_meeting { background-color: #fd7e14; }
 
-    /* Clock card spans 2 columns */
     .clock-card {
-      grid-column: span 2;
-      background: #0f2027;
       background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
       color: #00f0ff;
       font-family: 'Orbitron', monospace;
@@ -137,7 +138,10 @@
       text-shadow:
         0 0 10px #00e0ffcc,
         0 0 20px #00c0ffbb;
+      flex: 1 1 calc(40% - 1vh); /* double width */
+      max-width: calc(40% - 1vh);
       min-height: 12vh;
+      box-sizing: border-box;
     }
 
     .clock-subtext {
@@ -147,17 +151,17 @@
       letter-spacing: 1.5px;
       font-weight: 500;
       user-select: none;
-      text-shadow:
-        0 0 5px #00c0ff88;
+      text-shadow: 0 0 5px #00c0ff88;
     }
 
     @media (max-width: 1000px) {
-      .grid {
-        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-        height: auto;
+      .card {
+        flex: 1 1 calc(50% - 1vh);
+        max-width: calc(50% - 1vh);
       }
       .clock-card {
-        grid-column: span 1 !important;
+        flex: 1 1 100% !important;
+        max-width: 100% !important;
       }
     }
   </style>
@@ -202,7 +206,7 @@
               </div>`;
           });
 
-          // Clock card spans two columns in last row
+          // Add clock card last
           grid.innerHTML += `
             <div id="clock" class="clock-card">
               <div id="time">--:--:--</div>
