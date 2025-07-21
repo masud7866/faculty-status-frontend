@@ -12,14 +12,14 @@
       padding: 0;
     }
 
-    header {
+header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   background-color: #ffffffee;
   padding: 0.5rem 1rem;
   border-bottom: 2px solid #003366;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 header img {
@@ -31,7 +31,10 @@ header img {
   flex: 1;
   text-align: center;
 }
-
+ .title {
+      text-align: center;
+      flex: 1;
+    }
 .title span:first-child {
   color: #003366;
   font-size: 1.6rem;
@@ -44,27 +47,21 @@ header img {
   font-weight: 500;
 }
 
-.clock {
-  font-size: 1rem;
-  color: #003366;
-  font-weight: bold;
-  margin-left: 1rem;
+.header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  min-width: 80px;
 }
 
-    .title {
-      text-align: center;
-      flex: 1;
-    }
+.clock {
+  font-size: 0.9rem;
+  color: #003366;
+  font-weight: bold;
+}
 
-    .clock {
-      font-size: 1rem;
-      color: #003366;
-      font-weight: bold;
-      position: absolute;
-      right: 1rem;
-      top: 50%;
-      transform: translateY(-50%);
-    }
+
 
     .grid {
       display: grid;
@@ -136,16 +133,16 @@ header img {
 <body>
 <header>
   <img src="images/ugv_logo.png" alt="UGV Logo" />
-  
+
   <div class="header-center">
     <div class="title">
       <span>Department of Computer Science & Engineering</span><br>
       <span>University of Global Village (UGV), Barishal</span>
     </div>
   </div>
-  
-  <div style="display: flex; flex-direction: column; align-items: flex-end;">
-    <img src="images/cse_logo.png" alt="CSE Logo" />
+
+  <div class="images/header-right">
+    <img src="cse_logo.png" alt="CSE Logo" />
     <div class="clock" id="clock"></div>
   </div>
 </header>
