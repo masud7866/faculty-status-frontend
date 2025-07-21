@@ -63,10 +63,80 @@
     .on_leave   { background-color: #dc3545; }
     .off_duty   { background-color: #6c757d; }
     .in_meeting { background-color: #fd7e14; }
+
+    .header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: white;
+  padding: 1rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.logo {
+  width: 80px;
+  height: auto;
+}
+
+.logo.left {
+  order: 1;
+}
+
+.logo.right {
+  order: 3;
+}
+
+.title {
+  flex: 1;
+  text-align: center;
+  order: 2;
+}
+
+.title h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.title h2 {
+  margin: 0;
+  font-size: 1rem;
+  color: #555;
+}
+
+@media (max-width: 600px) {
+  .header {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .logo {
+    margin-bottom: 0.5rem;
+  }
+
+  .title h1 {
+    font-size: 1.2rem;
+  }
+
+  .title h2 {
+    font-size: 0.9rem;
+  }
+}
   </style>
 </head>
 <body>
-  <h1>Faculty Whereabouts</h1>
+  <div class="header">
+  <img src="/images/ugv_logo.png" alt="UGV Logo" class="logo left">
+  <div class="title">
+    <h1>Department of Computer Science and Engineering</h1>
+    <h2>University of Global Village (UGV)</h2>
+  </div>
+  <img src="/images/cse_logo.png" alt="CSE Logo" class="logo right">
+</div>
+
   <div id="grid" class="grid"></div>
 
   <script>
