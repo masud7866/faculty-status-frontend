@@ -49,12 +49,12 @@
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      grid-template-rows: repeat(4, 1fr);
+      grid-template-columns: repeat(5, 1fr);
       gap: 1vh;
       padding: 1vh 2vw;
       box-sizing: border-box;
-      height: calc(100vh - 7vh); /* header height subtracted */
+      height: calc(100vh - 7vh); /* header height */
+      overflow-y: auto;
     }
 
     .card {
@@ -71,6 +71,7 @@
       overflow: hidden;
       word-break: break-word;
       box-sizing: border-box;
+      min-height: 12vh;
     }
 
     .card img {
@@ -113,16 +114,17 @@
     .off_duty { background-color: #6c757d; }
     .in_meeting { background-color: #fd7e14; }
 
-    /* Clock card styling */
+    /* Clock card spans 2 columns */
     .clock-card {
-      grid-column: span 2;      /* span 2 columns */
-      grid-row: 4;              /* fixed to last row */
+      grid-column: span 2;
+      background: #0f2027;
       background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
       color: #00f0ff;
       font-family: 'Orbitron', monospace;
       font-size: 4vh;
       font-weight: 700;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
       border-radius: 1vh;
@@ -135,13 +137,27 @@
       text-shadow:
         0 0 10px #00e0ffcc,
         0 0 20px #00c0ffbb;
+      min-height: 12vh;
+    }
+
+    .clock-subtext {
+      font-size: 1.8vh;
+      margin-top: 0.3vh;
+      color: #00aaffcc;
+      letter-spacing: 1.5px;
+      font-weight: 500;
+      user-select: none;
+      text-shadow:
+        0 0 5px #00c0ff88;
     }
 
     @media (max-width: 1000px) {
       .grid {
         grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-        grid-template-rows: auto;
         height: auto;
+      }
+      .clock-card {
+        grid-column: span 1 !important;
       }
     }
   </style>
@@ -186,19 +202,26 @@
               </div>`;
           });
 
-          // Add clock card spanning 2 columns
-          grid.innerHTML += `<div id="clock" class="clock-card"></div>`;
+          // Clock card spans two columns in last row
+          grid.innerHTML += `
+            <div id="clock" class="clock-card">
+              <div id="time">--:--:--</div>
+              <div class="clock-subtext">CURRENT TIME</div>
+            </div>
+          `;
         });
     }
 
     function updateClock() {
       const now = new Date();
-      const clock = document.getElementById("clock");
-      if (clock) clock.textContent = now.toLocaleTimeString();
+      const timeElem = document.getElementById("time");
+      if (timeElem) {
+        timeElem.textContent = now.toLocaleTimeString();
+      }
     }
 
     loadFaculty();
-    setInterval(loadFaculty, 15000);
+    setInterval(loadFaculty, 3000);
     updateClock();
     setInterval(updateClock, 1000);
   </script>
