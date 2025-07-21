@@ -71,49 +71,56 @@
       height: calc(100vh - 8vh); /* Remaining height after header */
     }
 
-    .card {
-      background: white;
-      border-radius: 1vh;
-      padding: 0.8vh;
-      box-shadow: 0 0 6px rgba(0,0,0,0.15);
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      font-size: 1.6vh;
-      overflow: hidden;
-      word-break: break-word;
-      box-sizing: border-box;
-    }
+   .card {
+  background: white;
+  border-radius: 1vh;
+  padding: 1.2vh 0.8vh;
+  box-shadow: 0 0 6px rgba(0,0,0,0.15);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  font-size: 1.6vh;
+  overflow: hidden;
+  word-break: break-word;
+  box-sizing: border-box;
+}
 
-    .card img {
-      width: 5.5vh;
-      height: 5.5vh;
-      border-radius: 50%;
-      object-fit: cover;
-      margin-bottom: 0.3vh;
-    }
+.card img {
+  width: 6vh;
+  height: 6vh;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 0.5vh;
+}
 
-    .card h3 {
-      margin: 0.2vh 0 0.1vh;
-      font-size: 1.8vh;
-    }
+.card h3 {
+  margin: 0.3vh 0 0.2vh;
+  font-size: 2vh;
+  font-weight: 600;
+}
 
-    .card div {
-      margin: 0.2vh 0;
-      line-height: 1.2;
-      word-break: break-word;
-    }
+.card div {
+  margin: 0.3vh 0;
+  line-height: 1.4;
+  font-size: 1.6vh;
+  word-break: break-word;
+  max-width: 95%;
+  overflow-wrap: break-word;
+}
 
-    .status {
-      display: inline-block;
-      margin-top: 0.3vh;
-      padding: 0.3vh 0.6vh;
-      border-radius: 5px;
-      color: white;
-      font-weight: bold;
-      font-size: 1.3vh;
-    }
+.status {
+  display: inline-block;
+  margin-top: 0.5vh;
+  padding: 0.4vh 0.8vh;
+  border-radius: 6px;
+  color: white;
+  font-weight: bold;
+  font-size: 1.5vh;
+  letter-spacing: 0.3px;
+}
+
 
     .in_class { background-color: #007bff; }
     .at_dept { background-color: #28a745; }
