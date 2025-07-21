@@ -69,7 +69,11 @@
 </head>
 <body>
 
-  <h2>Faculty Control Panel</h2>
+  <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem;">
+  <h2>Control Panel</h2>
+  <button onclick="logout()" style="padding: 0.5rem 1rem; background-color: #ef4444; color: white; border: none; border-radius: 6px; cursor: pointer;">Logout</button>
+  </div>
+
   <div id="controls"></div>
   <div class="message" id="message"></div>
 
@@ -145,6 +149,14 @@
       });
     }
 
+    function logout() {
+  fetch("https://faculty-status-backend.onrender.com/api/logout", {
+    credentials: "include"
+  }).then(() => {
+    window.location.href = "login.html";
+  });
+}
+
     fetch("https://faculty-status-backend.onrender.com/api/faculty", { credentials: "include" })
       .then(res => res.json())
       .then(data => {
@@ -152,6 +164,7 @@
         render();
       })
       .catch(() => showMessage("Failed to load data.", true));
+    
   </script>
 
 </body>
