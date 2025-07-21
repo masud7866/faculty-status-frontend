@@ -107,13 +107,24 @@
 
   <script>
     // Redirect if already logged in
-    fetch("https://faculty-status-backend.onrender.com/api/faculty", {
-      credentials: "include"
-    }).then(res => {
-      if (res.ok) {
-        window.location.href = "control.html";
-      }
-    });
+    document.addEventListener("DOMContentLoaded", () => {
+  fetch("https://faculty-status-backend.onrender.com/api/faculty", {
+    credentials: "include"
+  })
+  .then(res => {
+    if (!res.ok) return;
+    return res.json();
+  })
+  .then(data => {
+    if (Array.isArray(data)) {
+      window.location.href = "control.html";
+    }
+  })
+  .catch(() => {
+    // ignore errors silently
+  });
+});
+
 
     document.getElementById("loginForm").addEventListener("submit", function (e) {
       e.preventDefault();
