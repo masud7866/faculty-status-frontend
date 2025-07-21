@@ -6,71 +6,88 @@
   <title>Faculty Whereabouts</title>
   <style>
     body {
-      font-family: sans-serif;
-      background-color: #f4f4f4;
       margin: 0;
-      padding: 0;
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
     }
 
     header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
       background: #004080;
       color: white;
-      padding: 0.5rem 1rem;
-      border-bottom: 4px solid #003060;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.4rem 1rem;
+      border-bottom: 5px solid #002855;
+    }
+
+    .header-left, .header-right {
+      flex: 0 0 auto;
     }
 
     header img {
       height: 60px;
-      width: auto;
     }
 
-    .header-title {
-      text-align: center;
+    .header-center {
       flex: 1;
-      font-size: 1.5rem;
+      text-align: center;
+      font-size: 1.8rem;
       font-weight: bold;
       text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
     }
 
     .clock {
-      font-size: 1.1rem;
+      font-size: 1rem;
       font-weight: bold;
-      margin-left: auto;
     }
 
     .grid {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
-      gap: 0.6rem;
+      grid-auto-rows: 1fr;
+      gap: 1rem;
       padding: 1rem;
+      box-sizing: border-box;
     }
 
     .card {
       background: white;
-      padding: 0.6rem;
-      border-radius: 8px;
+      border-radius: 10px;
+      padding: 1rem 0.5rem;
       text-align: center;
-      box-shadow: 0 0 6px rgba(0,0,0,0.1);
-      font-size: 0.8rem;
+      box-shadow: 0 0 6px rgba(0,0,0,0.15);
+      font-size: 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
     }
 
     .card img {
-      width: 70px;
-      height: 70px;
+      width: 80px;
+      height: 80px;
       object-fit: cover;
       border-radius: 50%;
+      margin-bottom: 0.5rem;
+    }
+
+    .card h3 {
+      margin: 0.3rem 0 0.2rem;
+      font-size: 1.1rem;
+    }
+
+    .card div {
+      margin-bottom: 0.2rem;
     }
 
     .status {
-      margin-top: 0.4rem;
-      padding: 0.2rem 0.4rem;
+      padding: 0.2rem 0.5rem;
       border-radius: 5px;
       color: white;
       font-weight: bold;
-      font-size: 0.75rem;
+      font-size: 0.9rem;
+      margin-top: 0.4rem;
     }
 
     .in_class { background-color: #007bff; }
@@ -78,6 +95,11 @@
     .on_leave { background-color: #dc3545; }
     .off_duty { background-color: #6c757d; }
     .in_meeting { background-color: #fd7e14; }
+
+    /* Center the last card if it's the 13th */
+    .grid .card:last-child:nth-child(13) {
+      grid-column: 4 / span 1;
+    }
 
     @media (max-width: 1600px) {
       .grid {
@@ -88,12 +110,16 @@
 </head>
 <body>
   <header>
-    <img src="images/ugv_logo.png" alt="UGV Logo">
-    <div class="header-title">
-      Department of CSE<br/>University of Global Village
+    <div class="header-left">
+      <img src="images/ugv_logo.png" alt="UGV Logo">
     </div>
-    <div class="clock" id="clock"></div>
-    <img src="images/cse_logo.png" alt="CSE Logo">
+    <div class="header-center">
+      Department of CSE<br>University of Global Village
+    </div>
+    <div class="header-right">
+      <div class="clock" id="clock"></div>
+      <img src="images/cse_logo.png" alt="CSE Logo">
+    </div>
   </header>
 
   <div id="grid" class="grid"></div>
