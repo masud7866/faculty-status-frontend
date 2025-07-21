@@ -149,13 +149,24 @@
       });
     }
 
-    function logout() {
+  function logout() {
   fetch("https://faculty-status-backend.onrender.com/api/logout", {
+    method: "POST", // or "GET" depending on your backend
     credentials: "include"
-  }).then(() => {
-    window.location.href = "login.html";
-  });
+  })
+  .then(res => {
+    if (res.ok) {
+      // Delay a bit to ensure cookies/session cleared
+      setTimeout(() => {
+        window.location.href = "login.html";
+      }, 300);
+    } else {
+      alert("Logout failed.");
+    }
+  })
+  .catch(() => alert("Logout error."));
 }
+
 
     fetch("https://faculty-status-backend.onrender.com/api/faculty", { credentials: "include" })
       .then(res => res.json())
