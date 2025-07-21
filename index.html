@@ -6,56 +6,50 @@
   <title>Faculty Whereabouts</title>
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #f9f9f9;
       margin: 0;
-      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f5f7fa;
     }
 
     header {
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      padding: 10px 20px;
-      background: linear-gradient(to right, #002244, #005577);
+      align-items: center;
+      padding: 0.5rem 1.5rem;
+      background: linear-gradient(to right, #00274D, #00509E);
       color: white;
-      border-bottom: 4px solid #003366;
-    }
-
-    header img {
-      height: 60px;
-      width: auto;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
     }
 
     header h1 {
-      margin: 0;
       font-size: 1.8rem;
+      font-weight: 700;
       text-align: center;
       flex: 1;
-      font-weight: bold;
-      letter-spacing: 1px;
+    }
+
+    header img {
+      height: 50px;
     }
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(5, 1fr); /* Fixed 5 columns */
-      gap: 12px;
-      padding: 15px;
-      max-width: 100vw;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 1rem;
+      padding: 1rem;
       box-sizing: border-box;
     }
 
     .card {
       background: white;
-      padding: 0.8rem;
-      border-radius: 10px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
       text-align: center;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      padding: 1rem;
       display: flex;
       flex-direction: column;
-      justify-content: flex-start;
-      height: 250px;
-      overflow: hidden;
+      justify-content: space-between;
+      height: 100%;
     }
 
     .card img {
@@ -63,82 +57,79 @@
       height: 80px;
       object-fit: cover;
       border-radius: 50%;
-      margin: 0 auto 8px auto;
+      margin: 0 auto 0.5rem;
     }
 
     .card h3 {
-      font-size: 1.1rem;
-      margin: 5px 0 2px 0;
+      margin: 0.4rem 0 0.2rem;
+      font-size: 1rem;
     }
 
-    .info {
+    .card .designation {
+      font-size: 0.9rem;
+      color: #333;
+      margin: 0.2rem 0;
+    }
+
+    .card .contact, .card .email {
       font-size: 0.8rem;
-      margin: 2px 0;
-      line-height: 1.2;
-      overflow-wrap: break-word;
+      color: #555;
+      margin: 0.1rem 0;
+      word-break: break-word;
     }
 
     .status {
-      display: inline-block;
-      margin-top: 5px;
-      padding: 3px 6px;
-      border-radius: 5px;
+      margin-top: 0.4rem;
+      padding: 0.3rem 0.6rem;
+      border-radius: 6px;
       color: white;
       font-weight: bold;
+      display: inline-block;
       font-size: 0.85rem;
     }
 
-    .in_class { background-color: #007bff; }
-    .at_dept { background-color: #28a745; }
-    .on_leave { background-color: #dc3545; }
-    .off_duty { background-color: #6c757d; }
-    .in_meeting { background-color: #fd7e14; }
+    .in_class    { background-color: #007bff; }
+    .at_dept     { background-color: #28a745; }
+    .on_leave    { background-color: #dc3545; }
+    .off_duty    { background-color: #6c757d; }
+    .in_meeting  { background-color: #fd7e14; }
 
     .clock-card {
       grid-column: span 2;
-      background: #001c40;
-      color: #fff;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 2.4rem;
+      font-size: 2rem;
       font-weight: bold;
-      letter-spacing: 2px;
-      border-radius: 10px;
-      height: 250px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      background: #222;
+      color: #0ff;
+      font-family: 'Courier New', monospace;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
     }
 
-    @media screen and (max-width: 900px) {
+    @media (max-width: 1024px) {
       .grid {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       }
+
       .clock-card {
-        grid-column: span 2;
-      }
-    }
-
-    @media screen and (min-width: 901px) and (max-width: 1200px) {
-      .grid {
-        grid-template-columns: repeat(3, 1fr);
-      }
-    }
-
-    @media screen and (min-width: 1201px) {
-      .grid {
-        grid-template-columns: repeat(5, 1fr); /* Reinforce 5 cols for large screens */
+        grid-column: span 1;
+        font-size: 1.5rem;
       }
     }
   </style>
 </head>
 <body>
   <header>
-    <img src="images/ugv_logo.png" alt="UGV Logo" />
+    <img src="images/ugv_logo.png" alt="UGV Logo">
     <h1>Department of CSE<br>University of Global Village</h1>
-    <img src="images/cse_logo.png" alt="CSE Logo" />
+    <img src="images/cse_logo.png" alt="CSE Logo">
   </header>
 
-  <div id="grid" class="grid"></div>
+  <div class="grid" id="grid">
+    <!-- Cards + Clock injected by JS -->
+  </div>
 
   <script>
     const STATUS_MAP = {
@@ -161,30 +152,35 @@
               <div class="card">
                 <img src="https://faculty-status-backend.onrender.com${f.image}" alt="${f.name}">
                 <h3>${f.name}</h3>
-                <div class="info">${f.designation || ""}</div>
-                <div class="info">${f.contact || ""}</div>
-                <div class="info">${f.email || ""}</div>
+                <div class="designation">${f.designation}</div>
+                <div class="contact">${f.contact}</div>
+                <div class="email">${f.email}</div>
                 <div class="status ${f.status}">${STATUS_MAP[f.status]}</div>
-              </div>`;
+              </div>
+            `;
           });
 
-          // Clock card after all faculty
-          grid.innerHTML += `<div class="clock-card" id="clock"></div>`;
+          // Append the clock card
+          const clockDiv = document.createElement("div");
+          clockDiv.className = "clock-card";
+          clockDiv.id = "clock";
+          grid.appendChild(clockDiv);
           updateClock();
         });
     }
 
     function updateClock() {
       const clock = document.getElementById("clock");
-      if (!clock) return;
-      const now = new Date();
-      const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-      clock.textContent = timeString;
+      if (clock) {
+        const now = new Date();
+        const time = now.toLocaleTimeString('en-GB', { hour12: false });
+        clock.textContent = time;
+      }
     }
 
     loadFaculty();
-    setInterval(loadFaculty, 15000);  // refresh data
-    setInterval(updateClock, 1000);   // update clock
+    setInterval(loadFaculty, 15000);
+    setInterval(updateClock, 1000);
   </script>
 </body>
 </html>
