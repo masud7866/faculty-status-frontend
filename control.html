@@ -3,108 +3,156 @@
 <head>
   <meta charset="UTF-8">
   <title>Faculty Control Panel</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #f3f4f6;
-      padding: 2rem;
-      color: #333;
+      background: #f9fafb;
+      margin: 0;
+      padding: 1rem;
     }
 
     h2 {
       text-align: center;
-      margin-bottom: 2rem;
       color: #1f2937;
+      margin-bottom: 1.5rem;
     }
 
-    .container {
-      max-width: 600px;
-      margin: 0 auto;
+    .faculty-card {
       background: white;
-      padding: 2rem;
       border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    }
-
-    .faculty-item {
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+      padding: 1rem;
       margin-bottom: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
     }
 
     label {
       font-weight: bold;
-      display: block;
-      margin-bottom: 0.5rem;
+      color: #374151;
     }
 
     select {
-      width: 100%;
       padding: 0.5rem;
-      font-size: 1rem;
       border-radius: 6px;
-      border: 1px solid #ccc;
-    }
-
-    button {
-      margin-top: 1.5rem;
-      padding: 0.75rem 1.5rem;
+      border: 1px solid #d1d5db;
       font-size: 1rem;
-      color: white;
-      background-color: #2563eb;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
+      background-color: #f3f4f6;
       width: 100%;
     }
 
-    button:hover {
-      background-color: #1d4ed8;
+    .message {
+      text-align: center;
+      font-size: 0.9rem;
+      color: green;
+      margin-top: 1rem;
+    }
+
+    @media (min-width: 600px) {
+      .faculty-card {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      label {
+        flex: 1;
+      }
+
+      select {
+        flex: 2;
+      }
     }
   </style>
 </head>
 <body>
+
   <h2>Faculty Control Panel</h2>
-  <div class="container">
-    <div id="controls"></div>
-    <button onclick="submit()">Update Status</button>
-  </div>
+  <div id="controls"></div>
+  <div class="message" id="message"></div>
 
   <script>
     let facultyData = [];
+
+    const statusOptions = [
+      "in_class",
+      "at_dept",
+      "on_leave",
+      "off_duty",
+      "in_meeting"
+    ];
+
+    const labels = {
+      in_class: "In Class",
+      at_dept: "At Department",
+      on_leave: "On Leave",
+      off_duty: "Off Duty",
+      in_meeting: "In Meeting"
+    };
+
+    const controls = document.getElementById('controls');
+    const message = document.getElementById('message');
+
+    function showMessage(text, isError = false) {
+      message.textContent = text;
+      message.style.color = isError ? "red" : "green";
+      setTimeout(() => message.textContent = "", 2000);
+    }
+
+    function updateFacultyData() {
+      fetch("https://faculty-status-backend.onrender.com/api/update", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(facultyData)
+      }).then(res => {
+        if (res.ok) showMessage("Status updated.");
+        else showMessage("Failed to update.", true);
+      }).catch(() => showMessage("Network error", true));
+    }
+
+    function render() {
+      controls.innerHTML = "";
+      facultyData.forEach((f, i) => {
+        const div = document.createElement("div");
+        div.className = "faculty-card";
+
+        const label = document.createElement("label");
+        label.textContent = f.name;
+
+        const select = document.createElement("select");
+        select.id = `status-${i}`;
+        statusOptions.forEach(opt => {
+          const option = document.createElement("option");
+          option.value = opt;
+          option.textContent = labels[opt];
+          if (opt === f.status) option.selected = true;
+          select.appendChild(option);
+        });
+
+        select.addEventListener("change", () => {
+          facultyData[i].status = select.value;
+          updateFacultyData();
+        });
+
+        div.appendChild(label);
+        div.appendChild(select);
+        controls.appendChild(div);
+      });
+    }
+
     fetch("https://faculty-status-backend.onrender.com/api/faculty", { credentials: "include" })
       .then(res => res.json())
       .then(data => {
         facultyData = data;
-        const controls = document.getElementById('controls');
-        data.forEach((f, i) => {
-          controls.innerHTML += `
-            <div class="faculty-item">
-              <label for="status-${i}">${f.name}</label>
-              <select id="status-${i}">
-                <option value="in_class" ${f.status === "in_class" ? "selected" : ""}>In Class</option>
-                <option value="at_dept" ${f.status === "at_dept" ? "selected" : ""}>At Department</option>
-                <option value="on_leave" ${f.status === "on_leave" ? "selected" : ""}>On Leave</option>
-                <option value="off_duty" ${f.status === "off_duty" ? "selected" : ""}>Off Duty</option>
-                <option value="in_meeting" ${f.status === "in_meeting" ? "selected" : ""}>In Meeting</option>
-              </select>
-            </div>`;
-        });
-      });
-
-    function submit() {
-      const updated = facultyData.map((f, i) => ({
-        ...f,
-        status: document.getElementById(`status-${i}`).value
-      }));
-      fetch("https://faculty-status-backend.onrender.com/api/update", {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },    
-        body: JSON.stringify(updated)
-      }).then(res => {
-        if (res.ok) alert("Status updated successfully!");
-        else alert("Failed to update status.");
-      });
-    }
+        render();
+      })
+      .catch(() => showMessage("Failed to load data.", true));
   </script>
+
 </body>
 </html>
