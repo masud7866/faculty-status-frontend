@@ -50,11 +50,24 @@
       margin-top: 1rem;
     }
 
+    .bulk-status {
+      margin-bottom: 1.5rem;
+      background: white;
+      padding: 1rem;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
     @media (min-width: 600px) {
       .faculty-card {
         flex-direction: row;
         align-items: center;
         justify-content: space-between;
+      }
+
+      .bulk-status {
+        max-width: 400px;
+        margin: 0 auto 2rem auto;
       }
 
       label {
@@ -70,8 +83,16 @@
 <body>
 
   <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem;">
-  <h2>Control Panel</h2>
-  <button onclick="logout()" style="padding: 0.5rem 1rem; background-color: #ef4444; color: white; border: none; border-radius: 6px; cursor: pointer;">Logout</button>
+    <h2>Control Panel</h2>
+    <button onclick="logout()" style="padding: 0.5rem 1rem; background-color: #ef4444; color: white; border: none; border-radius: 6px; cursor: pointer;">Logout</button>
+  </div>
+
+  <!-- Bulk status dropdown -->
+  <div class="bulk-status">
+    <label for="bulkStatus">Set Status for All Faculty:</label>
+    <select id="bulkStatus" onchange="setStatusForAll(this.value)">
+      <option value="">-- Select Status --</option>
+    </select>
   </div>
 
   <div id="controls"></div>
@@ -98,6 +119,7 @@
 
     const controls = document.getElementById('controls');
     const message = document.getElementById('message');
+    const bulkStatus = document.getElementById('bulkStatus');
 
     function showMessage(text, isError = false) {
       message.textContent = text;
@@ -115,10 +137,10 @@
         body: JSON.stringify(facultyData)
       }).then(res => {
         if (res.ok) showMessage("Status updated.");
-         else if (res.status === 403) {
-  alert("Session expired. Redirecting to login...");
-  window.location.href = "login.html";
-}
+        else if (res.status === 403) {
+          alert("Session expired. Redirecting to login...");
+          window.location.href = "login.html";
+        }
         else showMessage("Failed to update.", true);
       }).catch(() => showMessage("Network error", true));
     }
@@ -153,33 +175,46 @@
       });
     }
 
-  function logout() {
-  fetch("https://faculty-status-backend.onrender.com/api/logout", {
-    method: "POST", // or "GET" depending on your backend
-    credentials: "include"
-  })
-  .then(res => {
-    if (res.ok) {
-      // Delay a bit to ensure cookies/session cleared
-      setTimeout(() => {
-        window.location.href = "login.html";
-      }, 300);
-    } else {
-      alert("Logout failed.");
+    function setStatusForAll(status) {
+      if (!status) return;
+      facultyData.forEach(f => f.status = status);
+      updateFacultyData();
+      render(); // Refresh UI with new selection
     }
-  })
-  .catch(() => alert("Logout error."));
-}
 
+    function logout() {
+      fetch("https://faculty-status-backend.onrender.com/api/logout", {
+        method: "POST",
+        credentials: "include"
+      })
+        .then(res => {
+          if (res.ok) {
+            setTimeout(() => {
+              window.location.href = "login.html";
+            }, 300);
+          } else {
+            alert("Logout failed.");
+          }
+        })
+        .catch(() => alert("Logout error."));
+    }
 
+    // Initialize
     fetch("https://faculty-status-backend.onrender.com/api/faculty", { credentials: "include" })
       .then(res => res.json())
       .then(data => {
         facultyData = data;
         render();
+
+        // Populate bulk dropdown
+        statusOptions.forEach(opt => {
+          const option = document.createElement("option");
+          option.value = opt;
+          option.textContent = labels[opt];
+          bulkStatus.appendChild(option);
+        });
       })
       .catch(() => showMessage("Failed to load data.", true));
-    
   </script>
 
 </body>
