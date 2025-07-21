@@ -6,11 +6,37 @@
   <title>Faculty Whereabouts</title>
   <style>
     body {
-      font-family: sans-serif;
-      background-color: #f4f4f4;
-      margin: 0;
-      padding: 2rem;
-    }
+  font-family: sans-serif;
+  background-color: #f4f4f4;
+  margin: 0;
+  padding: 2rem;
+  font-size: 1.5rem; /* Bigger base text */
+}
+
+.card {
+  background: white;
+  padding: 2rem;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  font-size: 1.2em;
+}
+
+.card img {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.status {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  font-weight: bold;
+  font-size: 1.2em;
+}
+
 
     h1 {
       text-align: center;
@@ -23,22 +49,6 @@
       gap: 1rem;
     }
 
-    .card {
-      background: white;
-      padding: 1rem;
-      border-radius: 10px;
-      text-align: center;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-
-    .card img {
-      width: 100px;
-      height: 100px;
-      object-fit: cover;
-      border-radius: 50%;
-      margin-bottom: 0.5rem;
-    }
-
     .card h3 {
       margin: 0.3rem 0;
     }
@@ -47,15 +57,6 @@
       margin: 0.2rem 0;
       font-size: 0.9rem;
       color: #333;
-    }
-
-    .status {
-      display: inline-block;
-      margin: 0.5rem 0;
-      padding: 0.3rem 0.6rem;
-      border-radius: 5px;
-      color: white;
-      font-weight: bold;
     }
 
     .in_class   { background-color: #007bff; }
