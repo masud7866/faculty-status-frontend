@@ -107,7 +107,7 @@
 
   <script>
     // Redirect if already logged in
-    document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", () => {
   fetch("https://faculty-status-backend.onrender.com/api/faculty", {
     credentials: "include"
   })
@@ -121,7 +121,7 @@
     }
   })
   .catch(() => {
-    // ignore errors silently
+    // Ignore
   });
 });
 
