@@ -11,6 +11,7 @@
       margin: 0;
       padding: 0;
     }
+
     header {
       display: flex;
       align-items: center;
@@ -20,10 +21,12 @@
       color: white;
       border-bottom: 4px solid #003366;
     }
+
     header img {
       height: 60px;
       width: auto;
     }
+
     header h1 {
       margin: 0;
       font-size: 1.8rem;
@@ -35,7 +38,7 @@
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      grid-template-columns: repeat(5, 1fr); /* Fixed 5 columns */
       gap: 12px;
       padding: 15px;
       max-width: 100vw;
@@ -52,6 +55,7 @@
       flex-direction: column;
       justify-content: flex-start;
       height: 250px;
+      overflow: hidden;
     }
 
     .card img {
@@ -92,25 +96,37 @@
 
     .clock-card {
       grid-column: span 2;
-      background: #002244;
+      background: #001c40;
       color: #fff;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 2.2rem;
+      font-size: 2.4rem;
       font-weight: bold;
       letter-spacing: 2px;
       border-radius: 10px;
       height: 250px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
     }
 
-    @media screen and (max-width: 600px) {
-      header h1 {
-        font-size: 1.2rem;
+    @media screen and (max-width: 900px) {
+      .grid {
+        grid-template-columns: repeat(2, 1fr);
       }
       .clock-card {
-        font-size: 1.5rem;
-        grid-column: span 1 !important;
+        grid-column: span 2;
+      }
+    }
+
+    @media screen and (min-width: 901px) and (max-width: 1200px) {
+      .grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media screen and (min-width: 1201px) {
+      .grid {
+        grid-template-columns: repeat(5, 1fr); /* Reinforce 5 cols for large screens */
       }
     }
   </style>
@@ -126,8 +142,11 @@
 
   <script>
     const STATUS_MAP = {
-      in_class: "In Class", at_dept: "At Department", on_leave: "On Leave",
-      off_duty: "Off Duty", in_meeting: "In Meeting"
+      in_class: "In Class",
+      at_dept: "At Department",
+      on_leave: "On Leave",
+      off_duty: "Off Duty",
+      in_meeting: "In Meeting"
     };
 
     function loadFaculty() {
