@@ -5,89 +5,88 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Faculty Whereabouts</title>
   <style>
-    body {
+    html, body {
       margin: 0;
+      padding: 0;
+      background: #f0f0f0;
       font-family: Arial, sans-serif;
-      background: #f2f2f2;
+      overflow: hidden;
     }
 
     header {
-      background: #004080;
+      background: #003366;
       color: white;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0.4rem 1rem;
-      border-bottom: 5px solid #002855;
-    }
-
-    .header-left, .header-right {
-      flex: 0 0 auto;
+      padding: 0.5rem 1rem;
+      height: 10vh;
+      box-sizing: border-box;
     }
 
     header img {
-      height: 60px;
+      height: 7vh;
     }
 
     .header-center {
-      flex: 1;
       text-align: center;
-      font-size: 1.8rem;
+      font-size: 2.2vh;
       font-weight: bold;
-      text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+      line-height: 1.3;
     }
 
     .clock {
-      font-size: 1rem;
+      font-size: 1.5vh;
       font-weight: bold;
     }
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      grid-auto-rows: 1fr;
-      gap: 1rem;
-      padding: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(12vw, 1fr));
+      grid-auto-rows: 42vh;
+      gap: 1vh;
+      padding: 1vh;
+      height: 90vh;
       box-sizing: border-box;
     }
 
     .card {
       background: white;
-      border-radius: 10px;
-      padding: 1rem 0.5rem;
+      border-radius: 1vh;
+      padding: 1vh;
+      box-shadow: 0 0 6px rgba(0,0,0,0.2);
       text-align: center;
-      box-shadow: 0 0 6px rgba(0,0,0,0.15);
-      font-size: 1rem;
       display: flex;
       flex-direction: column;
-      align-items: center;
       justify-content: flex-start;
+      align-items: center;
+      font-size: 1.8vh;
     }
 
     .card img {
-      width: 80px;
-      height: 80px;
-      object-fit: cover;
+      width: 7vh;
+      height: 7vh;
       border-radius: 50%;
-      margin-bottom: 0.5rem;
+      object-fit: cover;
+      margin-bottom: 0.5vh;
     }
 
     .card h3 {
-      margin: 0.3rem 0 0.2rem;
-      font-size: 1.1rem;
+      margin: 0.3vh 0;
+      font-size: 2vh;
     }
 
     .card div {
-      margin-bottom: 0.2rem;
+      margin-bottom: 0.3vh;
     }
 
     .status {
-      padding: 0.2rem 0.5rem;
-      border-radius: 5px;
+      margin-top: 0.5vh;
+      padding: 0.2vh 0.6vh;
+      border-radius: 0.5vh;
       color: white;
       font-weight: bold;
-      font-size: 0.9rem;
-      margin-top: 0.4rem;
+      font-size: 1.5vh;
     }
 
     .in_class { background-color: #007bff; }
@@ -96,23 +95,28 @@
     .off_duty { background-color: #6c757d; }
     .in_meeting { background-color: #fd7e14; }
 
-    /* Center the last card if it's the 13th */
-    .grid .card:last-child:nth-child(13) {
-      grid-column: 4 / span 1;
+    @media (max-width: 1024px) {
+      .grid {
+        grid-template-columns: repeat(4, 1fr);
+        grid-auto-rows: 45vh;
+      }
     }
 
-    @media (max-width: 1600px) {
+    @media (max-width: 768px) {
       .grid {
-        grid-template-columns: repeat(5, 1fr);
+        grid-template-columns: repeat(2, 1fr);
+        grid-auto-rows: 47vh;
+      }
+
+      .header-center {
+        font-size: 1.5vh;
       }
     }
   </style>
 </head>
 <body>
   <header>
-    <div class="header-left">
-      <img src="images/ugv_logo.png" alt="UGV Logo">
-    </div>
+    <img src="images/ugv_logo.png" alt="UGV Logo">
     <div class="header-center">
       Department of CSE<br>University of Global Village
     </div>
@@ -163,9 +167,9 @@
     }
 
     loadFaculty();
-    setInterval(loadFaculty, 15000); // refresh data every 15 seconds
+    setInterval(loadFaculty, 15000); // Refresh every 15s
     updateClock();
-    setInterval(updateClock, 1000); // update clock every second
+    setInterval(updateClock, 1000); // Clock every second
   </script>
 </body>
 </html>
