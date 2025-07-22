@@ -49,12 +49,19 @@
     }
 
     #clock {
-      font-size: 1.8vh;
+      position: fixed;
+      right: 2vw;
+      bottom: 2vh;
+      z-index: 1000;
+      background: #1e3c72cc;
+      border-radius: 8px;
+      padding: 0.7vh 1.5vw;
+      box-shadow: 0 2px 8px #0002;
+      font-size: 2vh;
       font-family: 'Orbitron', sans-serif;
-      color: #ffffff;
-      white-space: nowrap;
+      color: #fff;
       animation: pulse 1.5s infinite ease-in-out;
-      padding-left: 1vw;
+      white-space: nowrap;
     }
 
     @keyframes pulse {
@@ -166,7 +173,7 @@
       <h1>Department of Computer Science & Engineering</h1>
       <h2>University of Global Village</h2>
     </div>
-    <div id="clock"></div>
+
     <img src="images/cse_logo.png" alt="CSE Logo" class="logo">
   </header>
 
@@ -212,6 +219,7 @@
     updateClock();
     setInterval(updateClock, 1000);
   </script>
+  <div id="clock"></div>
 </body>
 
 </html>
