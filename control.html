@@ -132,36 +132,23 @@
       setTimeout(() => message.textContent = "", 2000);
     }
 
-    // Update faculty data with manual overrides
     function updateFacultyData() {
-      const overrides = facultyData.map(f => {
-        const status = document.getElementById(`status-${f.name}`).value;
-
-        const duration = ["in meeting", "in class", "at department"].includes(status)
-          ? "1hr"
-          : "today";
-
-        return { name: f.name, status, duration };
-      });
-
       fetch("https://faculty-status-backend.onrender.com/api/update", {
         method: "POST",
         credentials: "include",
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify(overrides)
-      })
-        .then(res => {
-          if (res.ok) showMessage("Manual override updated.");
-          else if (res.status === 403) {
-            alert("Session expired. Redirecting to login...");
-            window.location.href = "login.html";
-          } else showMessage("Failed to update.", true);
-        })
-        .catch(() => showMessage("Network error", true));
+        body: JSON.stringify(facultyData)
+      }).then(res => {
+        if (res.ok) showMessage("Status updated.");
+        else if (res.status === 403) {
+          alert("Session expired. Redirecting to login...");
+          window.location.href = "login.html";
+        }
+        else showMessage("Failed to update.", true);
+      }).catch(() => showMessage("Network error", true));
     }
-
 
     function render() {
       controls.innerHTML = "";
@@ -169,6 +156,7 @@
         const div = document.createElement("div");
         div.className = "faculty-card";
 
+        // Create image element
         const img = document.createElement("img");
         img.src = "https://faculty-status-backend.onrender.com" + f.image;
         img.alt = f.name;
@@ -183,27 +171,23 @@
         label.style.display = "flex";
         label.style.alignItems = "center";
         label.style.gap = "1rem";
+
+        // Add image to label
         label.prepend(img);
 
         const select = document.createElement("select");
-        select.id = `status-${f.name}`;
+        select.id = `status-${i}`;
         statusOptions.forEach(opt => {
           const option = document.createElement("option");
           option.value = opt;
           option.textContent = labels[opt];
-
-          // Preselect override if available
-          if (f.manualOverride?.status === opt) {
-            option.selected = true;
-          } else if (!f.manualOverride && f.status === opt) {
-            option.selected = true;
-          }
-
+          if (opt === f.status) option.selected = true;
           select.appendChild(option);
         });
 
         select.addEventListener("change", () => {
           facultyData[i].status = select.value;
+          updateFacultyData();
         });
 
         div.appendChild(label);
@@ -212,17 +196,11 @@
       });
     }
 
-
     function setStatusForAll(status) {
       if (!status) return;
-      facultyData.forEach(f => {
-        f.status = status;
-        const select = document.getElementById(`status-${f.name}`);
-        if (select) select.value = status;
-      });
+      facultyData.forEach(f => f.status = status);
       updateFacultyData();
-      render();
-      showMessage(`All faculty set to ${labels[status]}.`);
+      render(); // Refresh UI with new selection
     }
 
     function logout() {
