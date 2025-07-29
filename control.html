@@ -142,8 +142,8 @@ function updateFacultyData() {
       console.warn(`Selector not found for: status-${f.name}`);
       return updatedEntry;
     }
-
     const selected = sel.value;
+    console.log("Updating status for:", updatedEntry.name, "Selected:", selected);
     if (selected) {
       updatedEntry.manualOverride = selected;
 
