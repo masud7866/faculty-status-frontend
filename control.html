@@ -132,16 +132,21 @@
       setTimeout(() => message.textContent = "", 2000);
     }
 
-    // Update faculty data with manual overrides
     function updateFacultyData() {
       const now = new Date();
-      const updated = facultyData.map((f, index) => {
-        const sel = document.getElementById(`status-${index}`);
-        const selected = sel.value;
+      const updated = facultyData.map(f => {
+        const safeName = f.name.replace(/\s+/g, '_');
+        const sel = document.getElementById(`status-${safeName}`);
+        if (!sel) {
+          console.warn(`Selector not found for: status-${safeName}`);
+          return null;
+        }
 
+        const selected = sel.value;
         const updatedEntry = { name: f.name };
-        console.log(sel, selected);
-        console.log("Updating status for:", updatedEntry.name);
+
+        console.log("Updating status for:", updatedEntry.name, "Selected:", selected);
+
         if (selected) {
           updatedEntry.manualOverride = selected;
 
@@ -156,7 +161,7 @@
         }
 
         return updatedEntry;
-      });
+      }).filter(Boolean); // Remove any nulls from missing selectors
 
       fetch("https://faculty-status-backend.onrender.com/api/update", {
         method: "POST",
@@ -175,6 +180,7 @@
         })
         .catch(() => showMessage("Network error", true));
     }
+
 
 
     function render() {
