@@ -218,6 +218,7 @@
 
         select.addEventListener("change", () => {
           facultyData[i].status = select.value;
+          updateFacultyData();
         });
 
         div.appendChild(label);
