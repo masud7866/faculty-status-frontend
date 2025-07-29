@@ -206,7 +206,8 @@
         label.prepend(img);
 
         const select = document.createElement("select");
-        select.id = `status-${f.name}`;
+        const safeName = f.name.replace(/\s+/g, '_');
+        select.id = `status-${safeName}`;
         statusOptions.forEach(opt => {
           const option = document.createElement("option");
           option.value = opt;
