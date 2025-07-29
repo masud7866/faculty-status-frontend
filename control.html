@@ -135,7 +135,7 @@
     // Update faculty data with manual overrides
     function updateFacultyData() {
       const now = new Date();
-      const updated = facultyList.map((f, index) => {
+      const updated = facultyData.map((f, index) => {
         const sel = document.getElementById(`status-${index}`);
         const selected = sel.value;
 
