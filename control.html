@@ -163,7 +163,7 @@
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify(overrides)
+        body: JSON.stringify(updated)
       })
         .then(res => {
           if (res.ok) showMessage("Manual override updated.");
