@@ -140,7 +140,8 @@
         const selected = sel.value;
 
         const updatedEntry = { name: f.name };
-
+        console.log(sel, selected);
+        console.log("Updating status for:", updatedEntry.name);
         if (selected) {
           updatedEntry.manualOverride = selected;
 
