@@ -132,98 +132,52 @@
       setTimeout(() => message.textContent = "", 2000);
     }
 
-    function updateFacultyData() {
-      const now = new Date();
-      const updated = facultyData.map((f) => {
-        const sel = document.getElementById(`status-${f.name}`);
-
-        const updatedEntry = { name: f.name };
-        if (!sel) {
-          console.warn(`Selector not found for: status-${f.name}`);
-          return updatedEntry;
-        }
-
-        const selected = sel.value;
-        if (selected) {
-          updatedEntry.manualOverride = selected;
-
-          const expiry = new Date(now);
-          if (["in_class", "at_dept", "in_meeting"].includes(selected)) {
-            expiry.setHours(expiry.getHours() + 1);
-          } else {
-            expiry.setHours(23, 59, 59, 999); // Until end of day
-          }
-
-          updatedEntry.overrideExpiry = expiry.toISOString();
-        }
-
-        return updatedEntry;
-      });
-
-      fetch("https://faculty-status-backend.onrender.com/api/update", {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(updated)
-      })
-        .then(res => {
-          if (res.ok) showMessage("Manual override updated.");
-          else if (res.status === 403) {
-            alert("Session expired. Redirecting to login...");
-            window.location.href = "login.html";
-          } else showMessage("Failed to update.", true);
-        })
-        .catch(() => showMessage("Network error", true));
-    }
-
-    const now = new Date();
-    const updated = facultyData.map(f => {
-      const sel = document.getElementById(`status-${f.name}`);
-      if (!sel) {
-        console.warn(`Selector not found for: status-${f.name}`);
-        return null;
-      }
-
-      const selected = sel.value;
-      const updatedEntry = { name: f.name };
-
-      console.log("Updating status for:", updatedEntry.name, "Selected:", selected);
-
-      if (selected) {
-        updatedEntry.manualOverride = selected;
-
-        const expiry = new Date(now);
-        if (["in_class", "at_dept", "in_meeting"].includes(selected)) {
-          expiry.setHours(expiry.getHours() + 1);
-        } else {
-          expiry.setHours(23, 59, 59, 999); // Until end of day
-        }
-
-        updatedEntry.overrideExpiry = expiry.toISOString();
-      }
-
+function updateFacultyData() {
+  const now = new Date();
+  const updated = facultyData.map((f) => {
+    const sel = document.getElementById(`status-${f.name}`);
+    
+    const updatedEntry = { name: f.name };
+    if (!sel) {
+      console.warn(`Selector not found for: status-${f.name}`);
       return updatedEntry;
-    }).filter(Boolean); // Remove any nulls from missing selectors
-
-    fetch("https://faculty-status-backend.onrender.com/api/update", {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(updated)
-    })
-      .then(res => {
-        if (res.ok) showMessage("Manual override updated.");
-        else if (res.status === 403) {
-          alert("Session expired. Redirecting to login...");
-          window.location.href = "login.html";
-        } else showMessage("Failed to update.", true);
-      })
-      .catch(() => showMessage("Network error", true));
     }
+
+    const selected = sel.value;
+    if (selected) {
+      updatedEntry.manualOverride = selected;
+
+      const expiry = new Date(now);
+      if (["in_class", "at_dept", "in_meeting"].includes(selected)) {
+        expiry.setHours(expiry.getHours() + 1);
+      } else {
+        expiry.setHours(23, 59, 59, 999); // Until end of day
+      }
+
+      updatedEntry.overrideExpiry = expiry.toISOString();
+    }
+
+    return updatedEntry;
+  });
+
+  fetch("https://faculty-status-backend.onrender.com/api/update", {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(updated)
+  })
+    .then(res => {
+      if (res.ok) showMessage("Manual override updated.");
+      else if (res.status === 403) {
+        alert("Session expired. Redirecting to login...");
+        window.location.href = "login.html";
+      } else showMessage("Failed to update.", true);
+    })
+    .catch(() => showMessage("Network error", true));
+}
+
 
 
 
