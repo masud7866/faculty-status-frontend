@@ -135,10 +135,9 @@
     function updateFacultyData() {
       const now = new Date();
       const updated = facultyData.map(f => {
-        const safeName = f.name.replace(/\s+/g, '_');
-        const sel = document.getElementById(`status-${safeName}`);
+        const sel = document.getElementById(`status-${f.name}`);
         if (!sel) {
-          console.warn(`Selector not found for: status-${safeName}`);
+          console.warn(`Selector not found for: status-${f.name}`);
           return null;
         }
 
@@ -206,8 +205,7 @@
         label.prepend(img);
 
         const select = document.createElement("select");
-        const safeName = f.name.replace(/\s+/g, '_');
-        select.id = `status-${safeName}`;
+        select.id = `status-${f.name}`;
         statusOptions.forEach(opt => {
           const option = document.createElement("option");
           option.value = opt;
