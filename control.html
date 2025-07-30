@@ -132,15 +132,9 @@
       setTimeout(() => message.textContent = "", 2000);
     }
 
-    function getNowDhaka() {
-      const now = new Date();
-      const utc = now.getTime() + now.getTimezoneOffset() * 60000;
-      return new Date(utc + 6 * 60 * 60000);
-    }
-
     function updateFacultyData() {
 
-      const now = getNowDhaka();
+      const now = new Date();
       const updated = facultyData.map((f) => {
         const sel = document.getElementById(`status-${f.name}`);
 
@@ -189,7 +183,7 @@
     }
 
     function updateSingleFacultyOverride(idx) {
-      const now = getNowDhaka();
+      const now = new Date();
       const f = facultyData[idx];
       const sel = document.getElementById(`status-${f.name}`);
       const selected = sel.value;
@@ -208,10 +202,6 @@
         console.log("Current time in Dhaka:", now.toISOString());
         console.log("Current Default time:", new Date().toISOString());
         updatedEntry.overrideExpiry = expiry.toISOString();
-        const rnow = new Date();
-        console.log("Local time string:", rnow.toLocaleString());
-        console.log("ISO time:", rnow.toISOString());
-        console.log("TimeZone Offset (min):", rnow.getTimezoneOffset());
       }
 
       fetch("https://faculty-status-backend.onrender.com/api/update", {
