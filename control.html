@@ -133,7 +133,7 @@
     }
 
 function updateFacultyData() {
-  const now = new Date();
+  const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Dhaka" }));
   const updated = facultyData.map((f) => {
     const sel = document.getElementById(`status-${f.name}`);
     
