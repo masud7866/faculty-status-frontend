@@ -253,10 +253,9 @@
           option.value = opt;
           option.textContent = labels[opt];
 
-          // Preselect override if available
-          if (f.manualOverride?.status === opt) {
-            option.selected = true;
-          } else if (!f.manualOverride && f.status === opt) {
+          // Show manualOverride if present, else show status
+          const currentStatus = f.manualOverride?.status || f.manualOverride || f.status;
+          if (currentStatus === opt) {
             option.selected = true;
           }
 
