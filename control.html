@@ -208,6 +208,10 @@
         console.log("Current time in Dhaka:", now.toISOString());
         console.log("Current Default time:", new Date().toISOString());
         updatedEntry.overrideExpiry = expiry.toISOString();
+        const now = new Date();
+        console.log("Local time string:", now.toLocaleString());
+        console.log("ISO time:", now.toISOString());
+        console.log("TimeZone Offset (min):", now.getTimezoneOffset());
       }
 
       fetch("https://faculty-status-backend.onrender.com/api/update", {
