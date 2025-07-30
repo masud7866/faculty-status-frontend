@@ -228,10 +228,14 @@
           select.appendChild(option);
         });
 
+
         select.addEventListener("change", () => {
+          // Only set manualOverride for the selected faculty
+          facultyData[i].manualOverride = { status: select.value };
           facultyData[i].status = select.value;
           updateFacultyData();
         });
+
 
         div.appendChild(label);
         div.appendChild(select);
