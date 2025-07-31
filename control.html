@@ -254,7 +254,7 @@
           option.textContent = labels[opt];
 
           // Show manualOverride if present, else show status
-          const currentStatus = f.manualOverride?.status || f.manualOverride || f.status;
+          const currentStatus = f.manualOverride || f.status;
           if (currentStatus === opt) {
             option.selected = true;
           }

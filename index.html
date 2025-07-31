@@ -201,7 +201,7 @@
           const grid = document.getElementById("grid");
           grid.innerHTML = "";
           data.forEach(f => {
-            const currentStatus = f.manualOverride?.status || f.manualOverride || f.status;
+            const currentStatus = f.manualOverride || f.status;
             const isManual = !!f.manualOverride;
             console.log(f, currentStatus, isManual);
             grid.innerHTML += `
