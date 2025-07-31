@@ -307,15 +307,19 @@
         timerBtn.style.marginLeft = "1rem";
         timerBtn.style.padding = "0.3rem 0.8rem";
         timerBtn.style.borderRadius = "6px";
-        timerBtn.style.border = "1px solid #fd7e14";
-        timerBtn.style.background = "#fff7e6";
-        timerBtn.style.color = "#b45309";
         timerBtn.style.fontWeight = "bold";
         timerBtn.style.fontSize = "0.95rem";
-        timerBtn.disabled = !f.manualOverride;
         if (f.manualOverride) {
+          timerBtn.style.border = "1px solid #fd7e14";
+          timerBtn.style.background = "#fff7e6";
+          timerBtn.style.color = "#b45309";
+          timerBtn.disabled = false;
           timerBtn.textContent = `Clear manual override (${getRemainingTime(f.overrideExpiry)})`;
         } else {
+          timerBtn.style.border = "1px solid #e5e7eb";
+          timerBtn.style.background = "#f3f4f6";
+          timerBtn.style.color = "#a1a1aa";
+          timerBtn.disabled = true;
           timerBtn.textContent = "No manual override";
         }
 
@@ -375,6 +379,10 @@
         // Show shortest remaining time
         const times = facultyData.map(f => getRemainingTime(f.overrideExpiry));
         bulkTimerBtn.textContent = "Clear all manual overrides (" + (times.length ? times.sort()[0] : "") + ")";
+        bulkTimerBtn.style.border = "1px solid #fd7e14";
+        bulkTimerBtn.style.background = "#fff7e6";
+        bulkTimerBtn.style.color = "#b45309";
+        bulkTimerBtn.disabled = false;
         bulkTimerBtn.onclick = () => {
           facultyData.forEach(f => {
             f.manualOverride = null;
@@ -395,6 +403,10 @@
         };
       } else {
         bulkTimerBtn.textContent = "Clear all manual overrides";
+        bulkTimerBtn.style.border = "1px solid #e5e7eb";
+        bulkTimerBtn.style.background = "#f3f4f6";
+        bulkTimerBtn.style.color = "#a1a1aa";
+        bulkTimerBtn.disabled = true;
         bulkTimerBtn.onclick = null;
       }
     }
