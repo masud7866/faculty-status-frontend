@@ -225,29 +225,12 @@
     }
 
     function parseCustomDate(str) {
-      // Supports "31/07/2025, 17:57:20" and "7/31/2025, 17:57:20"
-      if (!str) return null;
+      // Example input: "31/07/2025, 17:57:20"
       const [datePart, timePart] = str.split(',').map(s => s.trim());
       if (!datePart || !timePart) return null;
-      const dateParts = datePart.split('/');
-      let day, month, year;
-      if (dateParts[0].length === 4) {
-        // YYYY/MM/DD (rare, but just in case)
-        year = Number(dateParts[0]);
-        month = Number(dateParts[1]);
-        day = Number(dateParts[2]);
-      } else if (Number(dateParts[0]) > 12) {
-        // DD/MM/YYYY
-        day = Number(dateParts[0]);
-        month = Number(dateParts[1]);
-        year = Number(dateParts[2]);
-      } else {
-        // M/D/YYYY or MM/DD/YYYY
-        month = Number(dateParts[0]);
-        day = Number(dateParts[1]);
-        year = Number(dateParts[2]);
-      }
+      const [day, month, year] = datePart.split('/').map(Number);
       const [hour, minute, second] = timePart.split(':').map(Number);
+      // Construct date in local time
       return new Date(year, month - 1, day, hour, minute, second);
     }
 
