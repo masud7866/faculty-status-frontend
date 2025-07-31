@@ -304,7 +304,6 @@
         timerBtn.onclick = () => {
           facultyData[i].manualOverride = null;
           facultyData[i].overrideExpiry = null;
-          // Send clear request to backend
           fetch("https://faculty-status-backend.onrender.com/api/update", {
             method: "POST",
             credentials: "include",
@@ -314,7 +313,15 @@
               manualOverride: null,
               overrideExpiry: null
             }])
-          }).then(() => render());
+          }).then(() => {
+            // Re-fetch data to get updated expiry
+            fetch("https://faculty-status-backend.onrender.com/api/faculty", { credentials: "include" })
+              .then(res => res.json())
+              .then(data => {
+                facultyData = data;
+                render();
+              });
+          });
         };
 
         div.appendChild(label);
