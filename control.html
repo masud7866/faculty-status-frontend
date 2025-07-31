@@ -224,16 +224,17 @@
     }
 
     function getRemainingTime(expiry) {
-      if (!expiry) return "";
-      const now = new Date();
-      const exp = new Date(expiry);
-      const diffMs = exp - now;
-      if (diffMs <= 0) return "Expired";
-      const mins = Math.floor(diffMs / 60000) % 60;
-      const hrs = Math.floor(diffMs / 3600000);
-      const secs = Math.floor((diffMs % 60000) / 1000);
-      return `${hrs}h ${mins}m ${secs}s`;
-    }
+  if (!expiry) return "";
+  const exp = new Date(expiry);
+  if (isNaN(exp.getTime())) return "";
+  const now = new Date();
+  const diffMs = exp - now;
+  if (diffMs <= 0) return "Expired";
+  const mins = Math.floor(diffMs / 60000) % 60;
+  const hrs = Math.floor(diffMs / 3600000);
+  const secs = Math.floor((diffMs % 60000) / 1000);
+  return `${hrs}h ${mins}m ${secs}s`;
+}
 
     function render() {
       controls.innerHTML = "";
@@ -303,9 +304,17 @@
         timerBtn.onclick = () => {
           facultyData[i].manualOverride = null;
           facultyData[i].overrideExpiry = null;
-          facultyData[i].status = select.value;
-          updateSingleFacultyOverride(i);
-          render();
+          // Send clear request to backend
+          fetch("https://faculty-status-backend.onrender.com/api/update", {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify([{
+              name: f.name,
+              manualOverride: null,
+              overrideExpiry: null
+            }])
+          }).then(() => render());
         };
 
         div.appendChild(label);
@@ -349,8 +358,17 @@
             f.manualOverride = null;
             f.overrideExpiry = null;
           });
-          updateFacultyData();
-          render();
+          // Send clear request for all faculty
+          fetch("https://faculty-status-backend.onrender.com/api/update", {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(facultyData.map(f => ({
+              name: f.name,
+              manualOverride: null,
+              overrideExpiry: null
+            })))
+          }).then(() => render());
         };
       } else {
         bulkTimerBtn.textContent = "Clear all manual overrides";
