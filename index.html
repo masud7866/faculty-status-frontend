@@ -213,7 +213,6 @@
               <div>${f.email ? `<i class="fa-solid fa-envelope"></i> ${f.email}` : ""}</div>
               <div class="status ${currentStatus}">
                 ${STATUS_MAP[currentStatus] || currentStatus}
-                ${isManual ? '<span title="Manual Override" style="margin-left:5px;color:#fd7e14;"><i class="fa-solid fa-user-pen"></i></span>' : ''}
               </div>
             </div>`;
           });
