@@ -225,24 +225,24 @@
     }
 
     function getRemainingTime(expiry) {
-  if (!expiry) return "";
-  const exp = new Date(expiry);
-  if (isNaN(exp.getTime())) return "";
-  const now = new Date();
-  const diffMs = exp - now;
-  if (diffMs <= 0) return "Expired";
-  const mins = Math.floor(diffMs / 60000) % 60;
-  const hrs = Math.floor(diffMs / 3600000);
-  const secs = Math.floor((diffMs % 60000) / 1000);
-  return `${hrs}h ${mins}m ${secs}s`;
-}
+      if (!expiry) return "";
+      const exp = new Date(expiry);
+      if (isNaN(exp.getTime())) return "";
+      const now = new Date();
+      const diffMs = exp - now;
+      if (diffMs <= 0) return "Expired";
+      const mins = Math.floor(diffMs / 60000) % 60;
+      const hrs = Math.floor(diffMs / 3600000);
+      const secs = Math.floor((diffMs % 60000) / 1000);
+      return `${hrs}h ${mins}m ${secs}s`;
+    }
 
     function render() {
-  // Clear previous intervals
-  timerIntervals.forEach(clearInterval);
-  timerIntervals = [];
-  controls.innerHTML = "";
-  facultyData.forEach((f, i) => {
+      // Clear previous intervals
+      timerIntervals.forEach(clearInterval);
+      timerIntervals = [];
+      controls.innerHTML = "";
+      facultyData.forEach((f, i) => {
         const div = document.createElement("div");
         div.className = "faculty-card";
 
@@ -291,7 +291,7 @@
           updateSingleFacultyOverride(i);
           render();
         });
-
+        console.log("Name:", f.name, "Expiry:", f.overrideExpiry);
         // Timer button
         const timerBtn = document.createElement("button");
         timerBtn.style.marginLeft = "1rem";
