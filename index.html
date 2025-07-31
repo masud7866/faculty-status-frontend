@@ -211,7 +211,7 @@
               <div>${f.designation || ""}</div>
               <div>${f.contact ? `<i class="fa-solid fa-phone"></i> ${f.contact}` : ""}</div>
               <div>${f.email ? `<i class="fa-solid fa-envelope"></i> ${f.email}` : ""}</div>
-              <div class="status ${f.currentStatus}">
+              <div class="status ${currentStatus}">
                 ${STATUS_MAP[currentStatus] || currentStatus}
                 ${isManual ? '<span title="Manual Override" style="margin-left:5px;color:#fd7e14;"><i class="fa-solid fa-user-pen"></i></span>' : ''}
               </div>
