@@ -202,6 +202,7 @@
           grid.innerHTML = "";
           data.forEach(f => {
             const currentStatus = f.manualOverride?.status || f.manualOverride || f.status;
+            const isManual = !!f.manualOverride;
             grid.innerHTML += `
             <div class="card">
               <img src="https://faculty-status-backend.onrender.com${f.image}" alt="${f.name}">
