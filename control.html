@@ -385,8 +385,17 @@
 
     function setStatusForAll(status) {
       if (!status) return;
+      const now = new Date();
+      let expiry = new Date(now);
+      if (["in_class", "at_dept", "in_meeting"].includes(status)) {
+        expiry.setHours(expiry.getHours() + 1);
+      } else {
+        expiry.setHours(23, 59, 59, 999);
+      }
       facultyData.forEach(f => {
         f.status = status;
+        f.manualOverride = status;
+        f.overrideExpiry = expiry.toLocaleString();
         const select = document.getElementById(`status-${f.name}`);
         if (select) select.value = status;
       });
