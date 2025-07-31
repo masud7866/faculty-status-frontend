@@ -223,6 +223,17 @@
         .catch(() => showMessage("Network error", true));
     }
 
+    function getRemainingTime(expiry) {
+      if (!expiry) return "";
+      const now = new Date();
+      const exp = new Date(expiry);
+      const diffMs = exp - now;
+      if (diffMs <= 0) return "Expired";
+      const mins = Math.floor(diffMs / 60000) % 60;
+      const hrs = Math.floor(diffMs / 3600000);
+      const secs = Math.floor((diffMs % 60000) / 1000);
+      return `${hrs}h ${mins}m ${secs}s`;
+    }
 
     function render() {
       controls.innerHTML = "";
@@ -253,30 +264,99 @@
           option.value = opt;
           option.textContent = labels[opt];
 
-          // Show manualOverride if present, else show status
           const currentStatus = f.manualOverride || f.status;
           if (currentStatus === opt) {
             option.selected = true;
           }
-
           select.appendChild(option);
         });
 
-
         select.addEventListener("change", () => {
-          // Only set manualOverride for the selected faculty
-          facultyData[i].manualOverride = { status: select.value };
+          facultyData[i].manualOverride = select.value;
           facultyData[i].status = select.value;
+          // Set expiry
+          const now = new Date();
+          let expiry = new Date(now);
+          if (["in_class", "at_dept", "in_meeting"].includes(select.value)) {
+            expiry.setHours(expiry.getHours() + 1);
+          } else {
+            expiry.setHours(23, 59, 59, 999);
+          }
+          facultyData[i].overrideExpiry = expiry.toLocaleString();
           updateSingleFacultyOverride(i);
+          render();
         });
 
+        // Timer button
+        const timerBtn = document.createElement("button");
+        timerBtn.style.marginLeft = "1rem";
+        timerBtn.style.padding = "0.3rem 0.8rem";
+        timerBtn.style.borderRadius = "6px";
+        timerBtn.style.border = "1px solid #d1d5db";
+        timerBtn.style.background = "#f3f4f6";
+        timerBtn.style.fontSize = "0.95rem";
+        timerBtn.disabled = !f.manualOverride;
+        timerBtn.textContent = f.manualOverride
+          ? getRemainingTime(f.overrideExpiry)
+          : "No manual override";
+
+        timerBtn.onclick = () => {
+          facultyData[i].manualOverride = null;
+          facultyData[i].overrideExpiry = null;
+          facultyData[i].status = select.value;
+          updateSingleFacultyOverride(i);
+          render();
+        };
 
         div.appendChild(label);
         div.appendChild(select);
+        div.appendChild(timerBtn);
         controls.appendChild(div);
-      });
-    }
 
+        // Update timer every second if manual override is set
+        if (f.manualOverride) {
+          const intervalId = setInterval(() => {
+            if (!f.manualOverride) {
+              clearInterval(intervalId);
+              return;
+            }
+            timerBtn.textContent = getRemainingTime(f.overrideExpiry);
+          }, 1000);
+        }
+      });
+
+      // Bulk timer button
+      let allManual = facultyData.every(f => !!f.manualOverride);
+      let bulkTimerBtn = document.getElementById("bulk-timer-btn");
+      if (!bulkTimerBtn) {
+        bulkTimerBtn = document.createElement("button");
+        bulkTimerBtn.id = "bulk-timer-btn";
+        bulkTimerBtn.style.marginLeft = "1rem";
+        bulkTimerBtn.style.padding = "0.3rem 0.8rem";
+        bulkTimerBtn.style.borderRadius = "6px";
+        bulkTimerBtn.style.border = "1px solid #d1d5db";
+        bulkTimerBtn.style.background = "#f3f4f6";
+        bulkTimerBtn.style.fontSize = "0.95rem";
+        document.querySelector(".bulk-status").appendChild(bulkTimerBtn);
+      }
+      bulkTimerBtn.disabled = !allManual;
+      if (allManual) {
+        // Show shortest remaining time
+        const times = facultyData.map(f => getRemainingTime(f.overrideExpiry));
+        bulkTimerBtn.textContent = "Clear all manual overrides (" + (times.length ? times.sort()[0] : "") + ")";
+        bulkTimerBtn.onclick = () => {
+          facultyData.forEach(f => {
+            f.manualOverride = null;
+            f.overrideExpiry = null;
+          });
+          updateFacultyData();
+          render();
+        };
+      } else {
+        bulkTimerBtn.textContent = "Clear all manual overrides";
+        bulkTimerBtn.onclick = null;
+      }
+    }
 
     function setStatusForAll(status) {
       if (!status) return;
