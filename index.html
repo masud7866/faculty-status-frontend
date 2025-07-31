@@ -222,7 +222,7 @@
     function updateClock() {
       const now = new Date();
       const clock = document.getElementById("clock");
-      clock.textContent = now.toLocaleTimeString();
+      clock.textContent = now.toLocaleTimeString([], { hour12: true });
     }
 
     loadFaculty();
