@@ -224,10 +224,20 @@
         .catch(() => showMessage("Network error", true));
     }
 
+    function parseCustomDate(str) {
+      // Example input: "31/07/2025, 17:57:20"
+      const [datePart, timePart] = str.split(',').map(s => s.trim());
+      if (!datePart || !timePart) return null;
+      const [day, month, year] = datePart.split('/').map(Number);
+      const [hour, minute, second] = timePart.split(':').map(Number);
+      // Construct date in local time
+      return new Date(year, month - 1, day, hour, minute, second);
+    }
+
     function getRemainingTime(expiry) {
       if (!expiry) return "";
-      const exp = new Date(expiry);
-      if (isNaN(exp.getTime())) return "";
+      const exp = parseCustomDate(expiry);
+      if (!exp || isNaN(exp.getTime())) return "";
       const now = new Date();
       const diffMs = exp - now;
       if (diffMs <= 0) return "Expired";
