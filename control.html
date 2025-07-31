@@ -307,13 +307,17 @@
         timerBtn.style.marginLeft = "1rem";
         timerBtn.style.padding = "0.3rem 0.8rem";
         timerBtn.style.borderRadius = "6px";
-        timerBtn.style.border = "1px solid #d1d5db";
-        timerBtn.style.background = "#f3f4f6";
+        timerBtn.style.border = "1px solid #fd7e14";
+        timerBtn.style.background = "#fff7e6";
+        timerBtn.style.color = "#b45309";
+        timerBtn.style.fontWeight = "bold";
         timerBtn.style.fontSize = "0.95rem";
         timerBtn.disabled = !f.manualOverride;
-        timerBtn.textContent = f.manualOverride
-          ? getRemainingTime(f.overrideExpiry)
-          : "No manual override";
+        if (f.manualOverride) {
+          timerBtn.textContent = `Clear manual override (${getRemainingTime(f.overrideExpiry)})`;
+        } else {
+          timerBtn.textContent = "No manual override";
+        }
 
         timerBtn.onclick = () => {
           facultyData[i].manualOverride = null;
@@ -346,11 +350,7 @@
         // Update timer every second if manual override is set
         if (f.manualOverride) {
           const intervalId = setInterval(() => {
-            if (!f.manualOverride) {
-              clearInterval(intervalId);
-              return;
-            }
-            timerBtn.textContent = getRemainingTime(f.overrideExpiry);
+            timerBtn.textContent = `Clear manual override (${getRemainingTime(f.overrideExpiry)})`;
           }, 1000);
           timerIntervals.push(intervalId);
         }
