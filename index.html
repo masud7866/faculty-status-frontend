@@ -209,7 +209,7 @@
               <div>${f.designation || ""}</div>
               <div>${f.contact ? `<i class="fa-solid fa-phone"></i> ${f.contact}` : ""}</div>
               <div>${f.email ? `<i class="fa-solid fa-envelope"></i> ${f.email}` : ""}</div>
-              <div class="status ${f.currentStatus}">${STATUS_MAP[f.currentStatus]}</div>
+              <div class="status ${f.currentStatus}">${f.currentStatus}</div>
             </div>`;
           });
         });
