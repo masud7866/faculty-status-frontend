@@ -365,6 +365,7 @@
             f.manualOverride = null;
             f.overrideExpiry = null;
           });
+          bulkStatus.value = ""; // Reset bulk selector to default
           // Send clear request for all faculty
           fetch("https://faculty-status-backend.onrender.com/api/update", {
             method: "POST",
@@ -399,16 +400,34 @@
         const select = document.getElementById(`status-${f.name}`);
         if (select) select.value = status;
       });
-      updateFacultyData();
-      // Re-fetch faculty data to update bulk timer button and UI
-      fetch("https://faculty-status-backend.onrender.com/api/faculty", { credentials: "include" })
-        .then(res => res.json())
-        .then(data => {
-          facultyData = data;
-          render();
-          showMessage(`All faculty set to ${labels[status]}.`);
+
+      // Send update to backend, then re-fetch and render
+      fetch("https://faculty-status-backend.onrender.com/api/update", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(facultyData.map(f => ({
+          name: f.name,
+          manualOverride: f.manualOverride,
+          overrideExpiry: f.overrideExpiry
+        })))
+      })
+        .then(res => {
+          if (res.ok) {
+            // Re-fetch faculty data to update bulk timer button and UI
+            fetch("https://faculty-status-backend.onrender.com/api/faculty", { credentials: "include" })
+              .then(res => res.json())
+              .then(data => {
+                facultyData = data;
+                render();
+                showMessage(`All faculty set to ${labels[status]}.`);
+              })
+              .catch(() => showMessage("Failed to load data.", true));
+          } else {
+            showMessage("Failed to update.", true);
+          }
         })
-        .catch(() => showMessage("Failed to load data.", true));
+        .catch(() => showMessage("Network error", true));
     }
 
     function logout() {
