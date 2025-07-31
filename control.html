@@ -391,8 +391,15 @@
         if (select) select.value = status;
       });
       updateFacultyData();
-      render();
-      showMessage(`All faculty set to ${labels[status]}.`);
+      // Re-fetch faculty data to update bulk timer button and UI
+      fetch("https://faculty-status-backend.onrender.com/api/faculty", { credentials: "include" })
+        .then(res => res.json())
+        .then(data => {
+          facultyData = data;
+          render();
+          showMessage(`All faculty set to ${labels[status]}.`);
+        })
+        .catch(() => showMessage("Failed to load data.", true));
     }
 
     function logout() {
