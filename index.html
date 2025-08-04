@@ -203,6 +203,10 @@
           data.forEach(f => {
             const currentStatus = f.manualOverride || f.status;
             const isManual = !!f.manualOverride;
+            let extraInfo = "";
+            if (currentStatus === "in_class" && f.classroom && f.batch) {
+              extraInfo = `with ${f.batch} at ${f.classroom}`;
+            }
             console.log(currentStatus, isManual);
             grid.innerHTML += `
             <div class="card">
@@ -212,7 +216,7 @@
               <div>${f.contact ? `<i class="fa-solid fa-phone"></i> ${f.contact}` : ""}</div>
               <div>${f.email ? `<i class="fa-solid fa-envelope"></i> ${f.email}` : ""}</div>
               <div class="status ${currentStatus}">
-                ${STATUS_MAP[currentStatus] || currentStatus}
+                ${STATUS_MAP[currentStatus] || currentStatus} ${extraInfo}
               </div>
             </div>`;
           });
