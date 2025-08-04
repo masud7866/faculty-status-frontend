@@ -201,8 +201,8 @@
           const grid = document.getElementById("grid");
           grid.innerHTML = "";
           data.forEach(f => {
-            const currentStatus = f.manualOverride || f.status;
-            const isManual = !!f.manualOverride;
+            let status = f.manualOverride || f.status;
+            let isManual = !!f.manualOverride;
             // Extract string + optional room and batch
             let statusStr, room, batch;
 
@@ -227,8 +227,8 @@
               <div>${f.designation || ""}</div>
               <div>${f.contact ? `<i class="fa-solid fa-phone"></i> ${f.contact}` : ""}</div>
               <div>${f.email ? `<i class="fa-solid fa-envelope"></i> ${f.email}` : ""}</div>
-              <div class="status ${currentStatus}">
-                ${STATUS_MAP[currentStatus] || currentStatus} ${extraInfo}
+              <div class="status ${statusStr}">
+                ${STATUS_MAP[statusStr] || statusStr} ${extraInfo}
               </div>
             </div>`;
           });
