@@ -194,46 +194,37 @@
       on_weekend: "On Weekend"
     };
 
-    function loadFaculty() {
-      fetch("https://faculty-status-backend.onrender.com/api/faculty", { credentials: "include" })
-        .then(res => res.json())
-        .then(data => {
-          const grid = document.getElementById("grid");
-          grid.innerHTML = "";
-          data.forEach(f => {
-            let status = f.manualOverride || f.status;
-            let isManual = !!f.manualOverride;
-            // Extract string + optional room and batch
-            let statusStr, room, batch;
+function loadFaculty() {
+  fetch("https://faculty-status-backend.onrender.com/api/faculty", { credentials: "include" })
+    .then(res => res.json())
+    .then(data => {
+      const grid = document.getElementById("grid");
+      grid.innerHTML = "";
+      data.forEach(f => {
+        let statusObj = f.manualOverride || f.status;
+        let statusStr = typeof statusObj === "string" ? statusObj : statusObj?.status;
+        let room = typeof statusObj === "object" ? statusObj?.room : null;
+        let batch = typeof statusObj === "object" ? statusObj?.batch : null;
 
-            if (typeof status === "string") {
-              statusStr = status;
-            } else if (typeof status === "object") {
-              statusStr = status.status;
-              room = status.room;
-              batch = status.batch;
-            }
+        let extraInfo = "";
+        if (statusStr === "in_class" && room && batch) {
+          extraInfo = `<br><small class="text-gray">with ${batch} at ${room}</small>`;
+        }
 
-            let extraInfo = "";
-            if (statusStr === "in_class" && room && batch) {
-              extraInfo = `with ${batch} at ${room}`;
-            }
-
-            console.log(statusStr, isManual);
-            grid.innerHTML += `
-            <div class="card">
-              <img src="https://faculty-status-backend.onrender.com${f.image}" alt="${f.name}">
-              <h3>${f.name}</h3>
-              <div>${f.designation || ""}</div>
-              <div>${f.contact ? `<i class="fa-solid fa-phone"></i> ${f.contact}` : ""}</div>
-              <div>${f.email ? `<i class="fa-solid fa-envelope"></i> ${f.email}` : ""}</div>
-              <div class="status ${statusStr}">
-                ${STATUS_MAP[statusStr] || statusStr} ${extraInfo}
-              </div>
-            </div>`;
-          });
-        });
-    }
+        grid.innerHTML += `
+          <div class="card">
+            <img src="https://faculty-status-backend.onrender.com${f.image}" alt="${f.name}">
+            <h3>${f.name}</h3>
+            <div>${f.designation || ""}</div>
+            <div>${f.contact ? `<i class="fa-solid fa-phone"></i> ${f.contact}` : ""}</div>
+            <div>${f.email ? `<i class="fa-solid fa-envelope"></i> ${f.email}` : ""}</div>
+            <div class="status ${statusStr}">
+              ${STATUS_MAP[statusStr] || statusStr} ${extraInfo}
+            </div>
+          </div>`;
+      });
+    });
+}
 
     function updateClock() {
       const now = new Date();
