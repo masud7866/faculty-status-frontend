@@ -205,7 +205,7 @@ function loadFaculty() {
         let statusStr = typeof statusObj === "string" ? statusObj : statusObj?.status;
         let room = typeof statusObj === "object" ? statusObj?.room : null;
         let batch = typeof statusObj === "object" ? statusObj?.batch : null;
-
+        console.log(f.name, statusStr, room, batch);
         let extraInfo = "";
         if (statusStr === "in_class" && room && batch) {
           extraInfo = `<br><small class="text-gray">with ${batch} at ${room}</small>`;
