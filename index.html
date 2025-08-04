@@ -203,11 +203,23 @@
           data.forEach(f => {
             const currentStatus = f.manualOverride || f.status;
             const isManual = !!f.manualOverride;
-            let extraInfo = "";
-            if (currentStatus === "in_class" && f.room && f.batch) {
-              extraInfo = `with ${f.batch} at ${f.room}`;
+            // Extract string + optional room and batch
+            let statusStr, room, batch;
+
+            if (typeof status === "string") {
+              statusStr = status;
+            } else if (typeof status === "object") {
+              statusStr = status.status;
+              room = status.room;
+              batch = status.batch;
             }
-            console.log(currentStatus, isManual);
+
+            let extraInfo = "";
+            if (statusStr === "in_class" && room && batch) {
+              extraInfo = `with ${batch} at ${room}`;
+            }
+
+            console.log(statusStr, isManual);
             grid.innerHTML += `
             <div class="card">
               <img src="https://faculty-status-backend.onrender.com${f.image}" alt="${f.name}">
