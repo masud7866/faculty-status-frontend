@@ -204,8 +204,8 @@
             const currentStatus = f.manualOverride || f.status;
             const isManual = !!f.manualOverride;
             let extraInfo = "";
-            if (currentStatus === "in_class" && f.classroom && f.batch) {
-              extraInfo = `with ${f.batch} at ${f.classroom}`;
+            if (currentStatus === "in_class" && f.room && f.batch) {
+              extraInfo = `with ${f.batch} at ${f.room}`;
             }
             console.log(currentStatus, isManual);
             grid.innerHTML += `
