@@ -408,22 +408,21 @@
 
       if (allManual) {
         // Show shortest remaining time
-        const times = facultyData.map(f => getRemainingTime(f.overrideExpiry));
-        bulkTimerBtn.textContent = "Clear all manual overrides (" + (times.length ? times.sort()[0] : "") + ")";
-        bulkTimerBtn.style.border = "1px solid #fd7e14";
-        bulkTimerBtn.style.background = "#fff7e6";
-        bulkTimerBtn.style.color = "#b45309";
-        bulkTimerBtn.disabled = false;
-
         bulkTimerBtn.onclick = async () => {
+          bulkTimerBtn.disabled = true;
+          bulkTimerBtn.textContent = "Clearing...";
+
           try {
+            // Optimistically reset local data and UI
             facultyData.forEach(f => {
               f.manualOverride = null;
               f.overrideExpiry = null;
             });
-            bulkStatus.value = ""; // Reset bulk selector to default
+            bulkStatus.value = ""; // Reset bulk selector
+            render(); // Immediate UI update
 
-            const res = await fetch("https://faculty-status-backend.onrender.com/api/update", {
+            // Persist change to backend
+            const res = await fetchWithSessionCheck("https://faculty-status-backend.onrender.com/api/update", {
               method: "POST",
               credentials: "include",
               headers: { "Content-Type": "application/json" },
@@ -434,40 +433,24 @@
               })))
             });
 
-            if (res.status === 403) {
-              alert("Session expired. Redirecting to login...");
-              window.location.href = "login.html";
-              return;
-            }
-
-            if (!res.ok) {
-              showMessage("Failed to clear all manual overrides.", true);
-              return;
-            }
-
-            const facultyRes = await fetch("https://faculty-status-backend.onrender.com/api/faculty", {
+            // Re-fetch fresh data from backend
+            const facultyRes = await fetchWithSessionCheck("https://faculty-status-backend.onrender.com/api/faculty", {
               credentials: "include"
             });
-
-            if (facultyRes.status === 403) {
-              alert("Session expired. Redirecting to login...");
-              window.location.href = "login.html";
-              return;
-            }
-
-            if (!facultyRes.ok) {
-              showMessage("Failed to reload faculty data.", true);
-              return;
-            }
-
             facultyData = await facultyRes.json();
-            render();
+            render(); // Final render with backend-confirmed state
+
             showMessage("All manual overrides cleared.");
           } catch (err) {
-            showMessage("Network or server error occurred.", true);
-            console.error(err);
+            if (err.message !== "Session expired") {
+              showMessage("Failed to clear manual overrides.", true);
+              console.error(err);
+            }
+          } finally {
+            bulkTimerBtn.disabled = false;
           }
         };
+
       } else {
         bulkTimerBtn.textContent = "Clear all manual overrides";
         bulkTimerBtn.style.border = "1px solid #e5e7eb";
