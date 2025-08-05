@@ -408,6 +408,13 @@
 
       if (allManual) {
         // Show shortest remaining time
+        const times = facultyData.map(f => getRemainingTime(f.overrideExpiry));
+        bulkTimerBtn.textContent = "Clear all manual overrides (" + (times.length ? times.sort()[0] : "") + ")";
+        bulkTimerBtn.style.border = "1px solid #fd7e14";
+        bulkTimerBtn.style.background = "#fff7e6";
+        bulkTimerBtn.style.color = "#b45309";
+        bulkTimerBtn.disabled = false;
+
         bulkTimerBtn.onclick = async () => {
           bulkTimerBtn.disabled = true;
           bulkTimerBtn.textContent = "Clearing...";
