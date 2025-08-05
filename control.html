@@ -237,15 +237,16 @@
       return `${hrs}h ${mins}m ${secs}s`;
     }
 
-    function getStatusString(f) {
-      if (f.manualOverride) return f.manualOverride; // string
-      if (typeof f.status === "object" && f.status !== null) return f.status.status;
-      return f.status; // fallback
-    }
+
     function hasValidManualOverride(f) {
       return f.manualOverride && f.overrideExpiry && new Date(f.overrideExpiry) > new Date();
     }
-
+    function getStatusString(f) {
+      if (hasValidManualOverride(f)) return f.manualOverride;
+      if (typeof f.status === "object" && f.status !== null) return f.status.status;
+      return f.status;
+    }
+    
     function render() {
       // Clear previous intervals
       timerIntervals.forEach(clearInterval);
