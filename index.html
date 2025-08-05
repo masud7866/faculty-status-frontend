@@ -194,24 +194,32 @@
       on_weekend: "On Weekend"
     };
 
-function loadFaculty() {
-  fetch("https://faculty-status-backend.onrender.com/api/faculty", { credentials: "include" })
-    .then(res => res.json())
-    .then(data => {
-      const grid = document.getElementById("grid");
-      grid.innerHTML = "";
-      data.forEach(f => {
-        let statusObj = f.manualOverride || f.status;
-        let statusStr = typeof statusObj === "string" ? statusObj : statusObj?.status;
-        let room = typeof statusObj === "object" ? statusObj?.room : null;
-        let batch = typeof statusObj === "object" ? statusObj?.batch : null;
-        console.log(f.name, statusStr, room, batch);
-        let extraInfo = "";
-        if (statusStr === "in_class" && room && batch) {
-          extraInfo = `<br><small class="text-gray">with ${batch} at ${room}</small>`;
-        }
+    function loadFaculty() {
+      fetch("https://faculty-status-backend.onrender.com/api/faculty", { credentials: "include" })
+        .then(res => res.json())
+        .then(data => {
+          const grid = document.getElementById("grid");
+          grid.innerHTML = "";
+          data.forEach(f => {
+            let statusObj = f.manualOverride ?? f.status;
+            let statusStr, room, batch;
 
-        grid.innerHTML += `
+            if (typeof statusObj === "string") {
+              statusStr = statusObj;
+              room = null;
+              batch = null;
+            } else if (typeof statusObj === "object" && statusObj !== null) {
+              statusStr = statusObj.status;
+              room = statusObj.room ?? null;
+              batch = statusObj.batch ?? null;
+            }
+            console.log(f.name, statusStr, room, batch);
+            let extraInfo = "";
+            if (statusStr === "in_class" && room && batch) {
+              extraInfo = `<br><small class="text-gray">with ${batch} at ${room}</small>`;
+            }
+
+            grid.innerHTML += `
           <div class="card">
             <img src="https://faculty-status-backend.onrender.com${f.image}" alt="${f.name}">
             <h3>${f.name}</h3>
@@ -222,9 +230,9 @@ function loadFaculty() {
               ${STATUS_MAP[statusStr] || statusStr} ${extraInfo}
             </div>
           </div>`;
-      });
-    });
-}
+          });
+        });
+    }
 
     function updateClock() {
       const now = new Date();
