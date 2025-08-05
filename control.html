@@ -336,11 +336,14 @@
 
         timerBtn.onclick = async () => {
           timerBtn.disabled = true;
+
+          // Locally clear override
           facultyData[i].manualOverride = null;
           facultyData[i].overrideExpiry = null;
-          render();
+          render(); // Update UI immediately
 
           try {
+            // Send update to backend
             await fetchWithSessionCheck("https://faculty-status-backend.onrender.com/api/update", {
               method: "POST",
               credentials: "include",
@@ -352,29 +355,26 @@
               }])
             });
 
-            const facultyRes = await fetchWithSessionCheck("https://faculty-status-backend.onrender.com/api/faculty", {
+            // Optional: wait briefly for backend auto-status to kick in
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            // Fetch latest faculty data
+            const res = await fetchWithSessionCheck("https://faculty-status-backend.onrender.com/api/faculty", {
               credentials: "include"
             });
-            facultyData = await facultyRes.json();
+            facultyData = await res.json();
             render();
-
-            // ✅ Ensure the selector reflects cleared override visually
-            setTimeout(() => {
-              const selector = document.querySelectorAll("select.status-selector")[i];
-              if (selector) {
-                selector.value = facultyData[i].manualOverride || "";
-              }
-            }, 0);
-
+            showMessage("Manual override cleared.");
           } catch (err) {
             if (err.message !== "Session expired") {
-              showMessage("Failed to update.", true);
+              showMessage("Failed to clear override.", true);
               console.error(err);
             }
           } finally {
             timerBtn.disabled = false;
           }
         };
+
 
         div.appendChild(label);
         div.appendChild(select);
@@ -419,33 +419,36 @@
           bulkTimerBtn.disabled = true;
           bulkTimerBtn.textContent = "Clearing...";
 
-          try {
-            // Optimistically reset local data and UI
-            facultyData.forEach(f => {
-              f.manualOverride = null;
-              f.overrideExpiry = null;
-            });
-            bulkStatus.value = ""; // Reset bulk selector
-            render(); // Immediate UI update
+          // Locally clear all overrides
+          facultyData.forEach(f => {
+            f.manualOverride = null;
+            f.overrideExpiry = null;
+          });
+          bulkStatus.value = ""; // Reset bulk dropdown selection
+          render(); // Immediate UI update
 
-            // Persist change to backend
-            const res = await fetchWithSessionCheck("https://faculty-status-backend.onrender.com/api/update", {
+          try {
+            const body = facultyData.map(f => ({
+              name: f.name,
+              manualOverride: null,
+              overrideExpiry: null
+            }));
+
+            await fetchWithSessionCheck("https://faculty-status-backend.onrender.com/api/update", {
               method: "POST",
               credentials: "include",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(facultyData.map(f => ({
-                name: f.name,
-                manualOverride: null,
-                overrideExpiry: null
-              })))
+              body: JSON.stringify(body)
             });
 
-            // Re-fetch fresh data from backend
-            const facultyRes = await fetchWithSessionCheck("https://faculty-status-backend.onrender.com/api/faculty", {
+            // Optional delay for backend processing, you had 1 second
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            const res = await fetchWithSessionCheck("https://faculty-status-backend.onrender.com/api/faculty", {
               credentials: "include"
             });
-            facultyData = await facultyRes.json();
-            render(); // Final render with backend-confirmed state
+            facultyData = await res.json();
+            render();
 
             showMessage("All manual overrides cleared.");
           } catch (err) {
@@ -457,6 +460,7 @@
             bulkTimerBtn.disabled = false;
           }
         };
+
 
       } else {
         bulkTimerBtn.textContent = "Clear all manual overrides";
