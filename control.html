@@ -151,9 +151,9 @@
 
           const expiry = new Date(now);
           if (["in_class", "at_dept", "in_meeting"].includes(selected)) {
-            expiry.setHours(expiry.getHours() + 1);
+            expiry.setUTCHours(expiry.getUTCHours() + 1);
           } else {
-            expiry.setHours(23, 59, 59, 999); // Until end of day
+            expiry.setUTCHours(17, 59, 59, 999); // Until end of day
           }
           console.log("Updating status for:", updatedEntry.name, "Selected:", selected);
           console.log('Expiry set to:', expiry.toISOString(), "for status:", selected);
