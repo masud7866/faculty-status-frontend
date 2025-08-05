@@ -336,9 +336,11 @@
 
         timerBtn.onclick = async () => {
           timerBtn.disabled = true;
+          facultyData[i].manualOverride = null;
+          facultyData[i].overrideExpiry = null;
+          render();
 
           try {
-            // Send updated data to backend first
             await fetchWithSessionCheck("https://faculty-status-backend.onrender.com/api/update", {
               method: "POST",
               credentials: "include",
@@ -350,14 +352,19 @@
               }])
             });
 
-            // Fetch fresh data after success
             const facultyRes = await fetchWithSessionCheck("https://faculty-status-backend.onrender.com/api/faculty", {
               credentials: "include"
             });
             facultyData = await facultyRes.json();
-
-            // Render UI with fresh data
             render();
+
+            // ✅ Ensure the selector reflects cleared override visually
+            setTimeout(() => {
+              const selector = document.querySelectorAll("select.status-selector")[i];
+              if (selector) {
+                selector.value = facultyData[i].manualOverride || "";
+              }
+            }, 0);
 
           } catch (err) {
             if (err.message !== "Session expired") {
@@ -368,7 +375,6 @@
             timerBtn.disabled = false;
           }
         };
-
 
         div.appendChild(label);
         div.appendChild(select);
@@ -414,30 +420,33 @@
           bulkTimerBtn.textContent = "Clearing...";
 
           try {
-            // Prepare data for backend
-            const clearPayload = facultyData.map(f => ({
-              name: f.name,
-              manualOverride: null,
-              overrideExpiry: null
-            }));
+            // Optimistically reset local data and UI
+            facultyData.forEach(f => {
+              f.manualOverride = null;
+              f.overrideExpiry = null;
+            });
+            bulkStatus.value = ""; // Reset bulk selector
+            render(); // Immediate UI update
 
-            // ✅ Send to backend first
-            await fetchWithSessionCheck("https://faculty-status-backend.onrender.com/api/update", {
+            // Persist change to backend
+            const res = await fetchWithSessionCheck("https://faculty-status-backend.onrender.com/api/update", {
               method: "POST",
               credentials: "include",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(clearPayload)
+              body: JSON.stringify(facultyData.map(f => ({
+                name: f.name,
+                manualOverride: null,
+                overrideExpiry: null
+              })))
             });
 
-            // ✅ Fetch fresh data
+            // Re-fetch fresh data from backend
             const facultyRes = await fetchWithSessionCheck("https://faculty-status-backend.onrender.com/api/faculty", {
               credentials: "include"
             });
             facultyData = await facultyRes.json();
+            render(); // Final render with backend-confirmed state
 
-            // ✅ Reset dropdown and render fresh data
-            bulkStatus.value = "";
-            render();
             showMessage("All manual overrides cleared.");
           } catch (err) {
             if (err.message !== "Session expired") {
@@ -448,6 +457,7 @@
             bulkTimerBtn.disabled = false;
           }
         };
+
       } else {
         bulkTimerBtn.textContent = "Clear all manual overrides";
         bulkTimerBtn.style.border = "1px solid #e5e7eb";
