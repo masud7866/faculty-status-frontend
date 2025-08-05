@@ -237,6 +237,12 @@
       return `${hrs}h ${mins}m ${secs}s`;
     }
 
+    function getStatusString(f) {
+      if (f.manualOverride) return f.manualOverride; // string
+      if (typeof f.status === "object" && f.status !== null) return f.status.status;
+      return f.status; // fallback
+    }
+
     function render() {
       // Clear previous intervals
       timerIntervals.forEach(clearInterval);
@@ -269,7 +275,7 @@
           option.value = opt;
           option.textContent = labels[opt];
 
-          const currentStatus = f.manualOverride || f.status;
+          const currentStatus = getStatusString(f);
           if (currentStatus === opt) {
             option.selected = true;
           }
