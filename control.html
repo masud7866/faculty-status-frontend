@@ -103,24 +103,7 @@
 
   <script>
     function formatDhakaDate(date) {
-      const options = {
-        timeZone: "Asia/Dhaka",
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        hour12: false
-      };
-      let parts = new Intl.DateTimeFormat('en-GB', options).formatToParts(date);
-      let day = parts.find(p => p.type === 'day').value;
-      let month = parts.find(p => p.type === 'month').value;
-      let year = parts.find(p => p.type === 'year').value;
-      let hour = parts.find(p => p.type === 'hour').value;
-      let minute = parts.find(p => p.type === 'minute').value;
-      let second = parts.find(p => p.type === 'second').value;
-      return `${day}/${month}/${year}, ${hour}:${minute}:${second}`;
+      return new Date(date.toLocaleString('en-GB', { timeZone: 'Asia/Dhaka' })).toISOString();
     }
 
     let facultyData = [];
