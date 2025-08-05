@@ -313,7 +313,17 @@
       };
     }
 
+    function clearLoadingToasts() {
+      document.querySelectorAll('.toast.loading').forEach(toast => {
+        toast.style.animation = 'fadeOut 0.3s ease-in-out';
+        setTimeout(() => toast.remove(), 300);
+      });
+    }
+
     function showMessage(text, isError = false, isLoading = false) {
+      if (!isLoading) {
+        clearLoadingToasts();
+      }
       let toast = document.createElement('div');
       toast.className = `toast ${isError ? 'error' : isLoading ? 'loading' : ''}`;
       toast.textContent = text;
