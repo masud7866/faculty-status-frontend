@@ -22,10 +22,12 @@
       padding: 0.5vh 2vw;
       background: radial-gradient(#001947, #2360cb);
       border-bottom: 3px solid #ccc;
+      gap: 1vw;
     }
 
     .logo {
       height: 5.5vh;
+      flex-shrink: 0;
     }
 
     .header-center {
@@ -55,21 +57,14 @@
       color: #ffffff;
       white-space: nowrap;
       animation: pulse 1.5s infinite ease-in-out;
-      padding-left: 1vw;
-      width: 10vw;
+      width: 8vw;
       text-align: right;
+      flex-shrink: 0;
     }
 
     @keyframes pulse {
-
-      0%,
-      100% {
-        opacity: 1;
-      }
-
-      50% {
-        opacity: 0.7;
-      }
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
     }
 
     .grid {
@@ -80,7 +75,6 @@
       padding: 1vh 2vw;
       box-sizing: border-box;
       height: calc(100vh - 8vh);
-      /* Remaining height after header */
     }
 
     .card {
@@ -95,7 +89,6 @@
       justify-content: space-around;
       font-size: 1.6vh;
       overflow: hidden;
-      word-break: break-word;
       box-sizing: border-box;
     }
 
@@ -111,15 +104,20 @@
       margin: 0.3vh 0 0.2vh;
       font-size: 2vh;
       font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 90%;
     }
 
     .card div {
       margin: 0.3vh 0;
       line-height: 1.4;
       font-size: 1.6vh;
-      word-break: break-word;
-      max-width: 95%;
-      overflow-wrap: break-word;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 90%;
     }
 
     .card i {
@@ -128,7 +126,6 @@
     }
 
     .status {
-      display: inline-block;
       margin-top: 0.5vh;
       padding: 0.4vh 0.8vh;
       border-radius: 6px;
@@ -136,30 +133,41 @@
       font-weight: bold;
       font-size: 1.5vh;
       letter-spacing: 0.3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 90%;
     }
 
-    .in_class {
-      background-color: #007bff;
+    .extra-info {
+      font-size: 1.6vh;
+      color: #4b5e7e;
+      margin-top: 0.3vh;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 90%;
     }
 
-    .at_dept {
-      background-color: #28a745;
-    }
+    .in_class { background-color: #007bff; }
+    .at_dept { background-color: #28a745; }
+    .on_leave { background-color: #dc3545; }
+    .off_duty { background-color: #6c757d; }
+    .in_meeting { background-color: #fd7e14; }
+    .on_weekend { background-color: #ff0000; }
 
-    .on_leave {
-      background-color: #dc3545;
-    }
-
-    .off_duty {
-      background-color: #6c757d;
-    }
-
-    .in_meeting {
-      background-color: #fd7e14;
-    }
-
-    .on_weekend {
-      background-color: #ff0000;
+    .error-message {
+      position: fixed;
+      top: 10vh;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #dc3545;
+      color: white;
+      padding: 1vh 2vw;
+      border-radius: 1vh;
+      font-size: 2vh;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     }
 
     @media (max-width: 1000px) {
@@ -194,12 +202,50 @@
       on_weekend: "On Weekend"
     };
 
+    let lastFacultyData = [];
+
+    function truncateText(text, maxLength = 30) {
+      if (text.length > maxLength) {
+        return text.substring(0, maxLength - 3) + "...";
+      }
+      return text;
+    }
+
+    function showErrorMessage(message) {
+      let errorDiv = document.getElementById("error-message");
+      if (!errorDiv) {
+        errorDiv = document.createElement("div");
+        errorDiv.id = "error-message";
+        errorDiv.className = "error-message";
+        document.body.appendChild(errorDiv);
+      }
+      errorDiv.textContent = message;
+    }
+
+    function hideErrorMessage() {
+      const errorDiv = document.getElementById("error-message");
+      if (errorDiv) errorDiv.remove();
+    }
+
     function loadFaculty() {
       fetch("https://faculty-status-backend.onrender.com/api/faculty", { credentials: "include" })
-        .then(res => res.json())
+        .then(res => {
+          if (res.status === 403) {
+            showErrorMessage("Session expired. Please log in again.");
+            throw new Error("Session expired");
+          }
+          if (!res.ok) {
+            showErrorMessage("Failed to fetch faculty data.");
+            throw new Error("Request failed");
+          }
+          return res.json();
+        })
         .then(data => {
+          hideErrorMessage();
           const grid = document.getElementById("grid");
-          grid.innerHTML = "";
+          const currentNames = data.map(f => f.name);
+          lastFacultyData = lastFacultyData.filter(f => currentNames.includes(f.name));
+
           data.forEach(f => {
             let statusObj = f.manualOverride ?? f.status;
             let statusStr, room, batch;
@@ -213,38 +259,64 @@
               room = statusObj.room ?? null;
               batch = statusObj.batch ?? null;
             }
-            console.log(f.name, statusStr, room, batch);
-            let extraInfo = "";
-            if (statusStr === "in_class" && room && batch) {
-              extraInfo = `<small class="text-gray">with ${batch} at ${room}</small>`;
+
+            let existingCard = lastFacultyData.find(lf => lf.name === f.name);
+            let card = document.getElementById(`card-${f.name}`);
+
+            const extraInfo = statusStr === "in_class" && room && batch
+              ? `<div class="extra-info">with ${truncateText(batch)} at ${truncateText(room)}</div>`
+              : "";
+
+            const cardContent = `
+              <img src="https://faculty-status-backend.onrender.com${f.image}" alt="${f.name}">
+              <h3>${truncateText(f.name)}</h3>
+              <div>${truncateText(f.designation || "")}</div>
+              <div>${f.contact ? `<i class="fa-solid fa-phone"></i> ${truncateText(f.contact)}` : ""}</div>
+              <div>${f.email ? `<i class="fa-solid fa-envelope"></i> ${truncateText(f.email)}` : ""}</div>
+              <div class="status ${statusStr}">${STATUS_MAP[statusStr] || statusStr}</div>
+              ${extraInfo}
+            `;
+
+            if (!card) {
+              card = document.createElement("div");
+              card.id = `card-${f.name}`;
+              card.className = "card";
+              card.innerHTML = cardContent;
+              grid.appendChild(card);
+            } else if (!existingCard || JSON.stringify(existingCard) !== JSON.stringify(f)) {
+              card.innerHTML = cardContent;
             }
 
-            grid.innerHTML += `
-          <div class="card">
-            <img src="https://faculty-status-backend.onrender.com${f.image}" alt="${f.name}">
-            <h3>${f.name}</h3>
-            <div>${f.designation || ""}</div>
-            <div>${f.contact ? `<i class="fa-solid fa-phone"></i> ${f.contact}` : ""}</div>
-            <div>${f.email ? `<i class="fa-solid fa-envelope"></i> ${f.email}` : ""}</div>
-            <div class="status ${statusStr}">
-              ${STATUS_MAP[statusStr] || statusStr} ${extraInfo}
-            </div>
-          </div>`;
+            lastFacultyData = data;
           });
+
+          const allCards = document.querySelectorAll(".card");
+          allCards.forEach(card => {
+            if (!currentNames.includes(card.id.replace("card-", ""))) {
+              card.remove();
+            }
+          });
+
+          console.log("Updated facultyData:", data);
+        })
+        .catch(err => {
+          if (err.message !== "Session expired") {
+            showErrorMessage("Failed to fetch faculty data.");
+            console.error(err);
+          }
         });
     }
 
     function updateClock() {
       const now = new Date();
-      const clock = document.getElementById("clock");
-      clock.textContent = now.toLocaleTimeString([], { hour12: true });
+      const timeStr = now.toLocaleTimeString([], { hour12: true });
+      document.getElementById("clock").textContent = timeStr;
     }
 
     loadFaculty();
-    setInterval(loadFaculty, 3000);
+    setInterval(loadFaculty, 6000);
     updateClock();
     setInterval(updateClock, 1000);
   </script>
 </body>
-
 </html>
