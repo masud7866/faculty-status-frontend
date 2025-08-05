@@ -412,7 +412,7 @@
       facultyData.forEach(f => {
         f.status = status;
         f.manualOverride = status;
-        f.overrideExpiry = formatDhakaDate(expiry);
+        f.overrideExpiry = expiry.toISOString();
         const select = document.getElementById(`status-${f.name}`);
         if (select) select.value = status;
       });
