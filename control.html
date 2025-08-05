@@ -5,9 +5,10 @@
   <meta charset="UTF-8">
   <title>Faculty Control Panel</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Inter', Arial, sans-serif;
       background: #f9fafb;
       margin: 0;
       padding: 0;
@@ -37,72 +38,100 @@
       background-color: #ef4444;
       color: white;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       cursor: pointer;
       font-size: 0.9rem;
-      transition: background-color 0.2s;
+      transition: background-color 0.2s, transform 0.1s;
     }
 
     .logout-btn:hover {
       background-color: #dc2626;
+      transform: translateY(-1px);
     }
 
     .bulk-status {
       background: white;
-      padding: 1rem;
-      border-radius: 10px;
+      padding: 0.75rem;
+      border-radius: 8px;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-      margin: 1rem;
+      margin: 0.75rem;
       max-width: 100%;
       box-sizing: border-box;
-    }
-
-    .bulk-status label {
-      display: block;
-      font-weight: bold;
-      color: #374151;
-      margin-bottom: 0.5rem;
-    }
-
-    .bulk-status select {
-      width: 100%;
-      padding: 0.5rem;
-      border-radius: 6px;
-      border: 1px solid #d1d5db;
-      font-size: 0.9rem;
-      background-color: #f3f4f6;
-    }
-
-    .controls-container {
-      max-height: calc(100vh - 200px);
-      overflow-y: auto;
-      padding: 0 1rem;
-      margin-bottom: 1rem;
-    }
-
-    .faculty-card {
-      background: white;
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
-      padding: 0.75rem;
-      margin-bottom: 0.75rem;
       display: flex;
       flex-direction: column;
       gap: 0.5rem;
     }
 
+    .bulk-status label {
+      font-weight: 500;
+      color: #374151;
+      font-size: 0.9rem;
+    }
+
+    .bulk-status select {
+      padding: 0.5rem;
+      border-radius: 6px;
+      border: 1px solid #d1d5db;
+      font-size: 0.9rem;
+      background-color: #f3f4f6;
+      transition: border-color 0.2s;
+    }
+
+    .bulk-status select:focus {
+      border-color: #3b82f6;
+      outline: none;
+    }
+
+    .sort-controls {
+      margin: 0.75rem;
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .sort-controls select {
+      padding: 0.5rem;
+      border-radius: 6px;
+      border: 1px solid #d1d5db;
+      font-size: 0.9rem;
+      background-color: #f3f4f6;
+      width: 150px;
+    }
+
+    .controls-container {
+      max-height: calc(100vh - 220px);
+      overflow-y: auto;
+      padding: 0 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .faculty-card {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+      padding: 0.5rem;
+      margin-bottom: 0.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .faculty-card:nth-child(even) {
+      background: #f8fafc;
+    }
+
     .faculty-card label {
-      font-weight: bold;
+      font-weight: 500;
       color: #374151;
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
     }
 
     .faculty-card img {
-      width: 40px;
-      height: 40px;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
       object-fit: cover;
     }
@@ -111,25 +140,39 @@
       padding: 0.5rem;
       border-radius: 6px;
       border: 1px solid #d1d5db;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       background-color: #f3f4f6;
-      width: 100%;
+      transition: border-color 0.2s;
+    }
+
+    .faculty-card select:focus {
+      border-color: #3b82f6;
+      outline: none;
     }
 
     .faculty-card button {
       padding: 0.3rem 0.8rem;
       border-radius: 6px;
-      font-weight: bold;
+      font-weight: 500;
       font-size: 0.85rem;
       border: 1px solid #e5e7eb;
       background: #f3f4f6;
       color: #a1a1aa;
+      transition: transform 0.1s;
     }
 
     .faculty-card button:not(:disabled) {
       border: 1px solid #fd7e14;
       background: #fff7e6;
       color: #b45309;
+    }
+
+    .faculty-card button:not(:disabled):hover {
+      transform: translateY(-1px);
+    }
+
+    .faculty-card button.expiring {
+      animation: pulse 1.5s infinite;
     }
 
     button:disabled {
@@ -145,7 +188,7 @@
       background: #10b981;
       color: white;
       padding: 0.75rem 1.5rem;
-      border-radius: 6px;
+      border-radius: 8px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
       z-index: 100;
       font-size: 0.9rem;
@@ -153,6 +196,7 @@
       text-align: center;
       animation: fadeIn 0.3s ease-in-out;
       cursor: pointer;
+      margin-top: 0.5rem;
     }
 
     .toast.error {
@@ -161,6 +205,20 @@
 
     .toast.loading {
       background: #6b7280;
+    }
+
+    .toast .progress {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 3px;
+      background: rgba(255, 255, 255, 0.5);
+      animation: progress 4s linear forwards;
+    }
+
+    @keyframes pulse {
+      0%, 100% { border-color: #fd7e14; }
+      50% { border-color: #f97316; }
     }
 
     @keyframes fadeIn {
@@ -173,17 +231,37 @@
       to { opacity: 0; transform: translate(-50%, -20px); }
     }
 
+    @keyframes progress {
+      from { width: 100%; }
+      to { width: 0; }
+    }
+
     @media (min-width: 600px) {
       .faculty-card {
         flex-direction: row;
         align-items: center;
         justify-content: space-between;
-        padding: 1rem;
+        padding: 0.75rem;
       }
 
       .bulk-status {
         max-width: 400px;
-        margin: 1rem auto;
+        margin: 0.75rem auto;
+        flex-direction: row;
+        align-items: center;
+      }
+
+      .bulk-status label {
+        flex: 1;
+      }
+
+      .bulk-status select {
+        flex: 2;
+      }
+
+      .bulk-status button {
+        flex: 1;
+        max-width: 200px;
       }
 
       .faculty-card label {
@@ -212,6 +290,16 @@
     <label for="bulkStatus">Set Status for All Faculty:</label>
     <select id="bulkStatus" onchange="setStatusForAll(this.value)">
       <option value="">-- Select Status --</option>
+    </select>
+  </div>
+
+  <div class="sort-controls">
+    <label for="sortFaculty">Sort Faculty By:</label>
+    <select id="sortFaculty" onchange="sortFaculty(this.value)">
+      <option value="name-asc">Name (A-Z)</option>
+      <option value="name-desc">Name (Z-A)</option>
+      <option value="designation-asc">Designation (A-Z)</option>
+      <option value="designation-desc">Designation (Z-A)</option>
     </select>
   </div>
 
@@ -252,19 +340,20 @@
     }
 
     function showMessage(text, isError = false, isLoading = false) {
-      let toast = document.querySelector('.toast');
-      if (toast) toast.remove();
-
-      toast = document.createElement('div');
+      let toast = document.createElement('div');
       toast.className = `toast ${isError ? 'error' : isLoading ? 'loading' : ''}`;
       toast.textContent = text;
+      toast.style.top = `${1 + document.querySelectorAll('.toast').length * 3}rem`;
       document.body.appendChild(toast);
 
       if (!isLoading) {
+        const progress = document.createElement('div');
+        progress.className = 'progress';
+        toast.appendChild(progress);
         setTimeout(() => {
           toast.style.animation = 'fadeOut 0.3s ease-in-out';
           setTimeout(() => toast.remove(), 300);
-        }, 3000);
+        }, 4000);
       }
 
       toast.onclick = () => {
@@ -283,11 +372,19 @@
       const mins = Math.floor(diffMs / 60000) % 60;
       const hrs = Math.floor(diffMs / 3600000);
       const secs = Math.floor((diffMs % 60000) / 1000);
-      return `${hrs}h ${mins}m ${secs}s`;
+      return `${hrs}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     }
 
     function hasValidManualOverride(f) {
       return f.manualOverride && f.overrideExpiry && new Date(f.overrideExpiry) > new Date();
+    }
+
+    function isExpiringSoon(expiry) {
+      if (!expiry) return false;
+      const exp = new Date(expiry);
+      const now = new Date();
+      const diffMs = exp - now;
+      return diffMs > 0 && diffMs <= 5 * 60 * 1000; // Less than 5 minutes
     }
 
     function getStatusString(f) {
@@ -304,7 +401,19 @@
       if (allManual) {
         const times = facultyData.map(f => getRemainingTime(f.overrideExpiry)).filter(t => t !== "Expired");
         bulkTimerBtn.textContent = "Clear all manual overrides (" + (times.length ? times.sort()[0] : "Expired") + ")";
+        bulkTimerBtn.classList.toggle('expiring', times.length && facultyData.some(f => isExpiringSoon(f.overrideExpiry)));
       }
+    }
+
+    function sortFaculty(criteria) {
+      localStorage.setItem('sortPreference', criteria);
+      const [key, order] = criteria.split('-');
+      facultyData.sort((a, b) => {
+        const valA = a[key].toLowerCase();
+        const valB = b[key].toLowerCase();
+        return order === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+      });
+      render();
     }
 
     async function fetchWithSessionCheck(url, options) {
@@ -372,7 +481,6 @@
         const currentStatus = getStatusString(f);
         const select = document.getElementById(`status-${f.name}`);
         if (select && select.value === currentStatus && !isNew) {
-          // Skip full render if status unchanged
           const timerBtn = document.getElementById(`timer-btn-${f.name}`);
           if (timerBtn) {
             if (hasValidManualOverride(f)) {
@@ -380,13 +488,15 @@
               timerBtn.style.background = "#fff7e6";
               timerBtn.style.color = "#b45309";
               timerBtn.disabled = false;
-              timerBtn.textContent = `Clear manual override (${getRemainingTime(f.overrideExpiry)})`;
+              timerBtn.textContent = `Clear override (${getRemainingTime(f.overrideExpiry)})`;
+              timerBtn.classList.toggle('expiring', isExpiringSoon(f.overrideExpiry));
             } else {
               timerBtn.style.border = "1px solid #e5e7eb";
               timerBtn.style.background = "#f3f4f6";
               timerBtn.style.color = "#a1a1aa";
               timerBtn.disabled = true;
               timerBtn.textContent = "No manual override";
+              timerBtn.classList.remove('expiring');
             }
           }
           return;
@@ -396,13 +506,13 @@
         const img = document.createElement("img");
         img.src = "https://faculty-status-backend.onrender.com" + f.image;
         img.alt = f.name;
-        img.style.width = "40px";
-        img.style.height = "40px";
+        img.style.width = "36px";
+        img.style.height = "36px";
         img.style.borderRadius = "50%";
         img.style.objectFit = "cover";
 
         const label = document.createElement("label");
-        label.textContent = f.name;
+        label.textContent = `${f.name} (${f.designation})`;
         label.style.display = "flex";
         label.style.alignItems = "center";
         label.style.gap = "0.5rem";
@@ -457,14 +567,15 @@
         timerBtn.style.marginLeft = "0";
         timerBtn.style.padding = "0.3rem 0.8rem";
         timerBtn.style.borderRadius = "6px";
-        timerBtn.style.fontWeight = "bold";
+        timerBtn.style.fontWeight = "500";
         timerBtn.style.fontSize = "0.85rem";
         if (hasValidManualOverride(f)) {
           timerBtn.style.border = "1px solid #fd7e14";
           timerBtn.style.background = "#fff7e6";
           timerBtn.style.color = "#b45309";
           timerBtn.disabled = false;
-          timerBtn.textContent = `Clear manual override (${getRemainingTime(f.overrideExpiry)})`;
+          timerBtn.textContent = `Clear override (${getRemainingTime(f.overrideExpiry)})`;
+          timerBtn.classList.toggle('expiring', isExpiringSoon(f.overrideExpiry));
         } else {
           timerBtn.style.border = "1px solid #e5e7eb";
           timerBtn.style.background = "#f3f4f6";
@@ -513,7 +624,8 @@
           const intervalId = setInterval(() => {
             const btn = document.getElementById(`timer-btn-${f.name}`);
             if (btn) {
-              btn.textContent = `Clear manual override (${getRemainingTime(f.overrideExpiry)})`;
+              btn.textContent = `Clear override (${getRemainingTime(f.overrideExpiry)})`;
+              btn.classList.toggle('expiring', isExpiringSoon(f.overrideExpiry));
               if (!hasValidManualOverride(f)) {
                 clearInterval(intervalId);
                 timerIntervals = timerIntervals.filter(id => id !== intervalId);
@@ -552,11 +664,12 @@
 
         if (allManual) {
           const times = facultyData.map(f => getRemainingTime(f.overrideExpiry)).filter(t => t !== "Expired");
-          bulkTimerBtn.textContent = "Clear all manual overrides (" + (times.length ? times.sort()[0] : "Expired") + ")";
+          bulkTimerBtn.textContent = "Clear all overrides (" + (times.length ? times.sort()[0] : "Expired") + ")";
           bulkTimerBtn.style.border = "1px solid #fd7e14";
           bulkTimerBtn.style.background = "#fff7e6";
           bulkTimerBtn.style.color = "#b45309";
           bulkTimerBtn.disabled = false;
+          bulkTimerBtn.classList.toggle('expiring', times.length && facultyData.some(f => isExpiringSoon(f.overrideExpiry)));
 
           if (bulkTimerInterval) clearInterval(bulkTimerInterval);
           bulkTimerInterval = setInterval(() => {
@@ -609,12 +722,13 @@
             }
           };
         } else {
-          bulkTimerBtn.textContent = "Clear all manual overrides";
+          bulkTimerBtn.textContent = "Clear all overrides";
           bulkTimerBtn.style.border = "1px solid #e5e7eb";
           bulkTimerBtn.style.background = "#f3f4f6";
           bulkTimerBtn.style.color = "#a1a1aa";
           bulkTimerBtn.disabled = true;
           bulkTimerBtn.onclick = null;
+          bulkTimerBtn.classList.remove('expiring');
           if (bulkTimerInterval) {
             clearInterval(bulkTimerInterval);
             bulkTimerInterval = null;
@@ -704,7 +818,9 @@
       .then(data => {
         if (data) {
           facultyData = data;
-          render();
+          const savedSort = localStorage.getItem('sortPreference') || 'name-asc';
+          document.getElementById('sortFaculty').value = savedSort;
+          sortFaculty(savedSort);
           startPolling();
 
           statusOptions.forEach(opt => {
