@@ -10,58 +10,126 @@
       font-family: Arial, sans-serif;
       background: #f9fafb;
       margin: 0;
-      padding: 1rem;
+      padding: 0;
+      overflow-x: hidden;
+    }
+
+    .header {
+      position: sticky;
+      top: 0;
+      background: white;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      padding: 0.5rem 1rem;
+      z-index: 10;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
     h2 {
-      text-align: center;
       color: #1f2937;
-      margin-bottom: 1.5rem;
+      margin: 0;
+      font-size: 1.5rem;
+    }
+
+    .logout-btn {
+      padding: 0.5rem 1rem;
+      background-color: #ef4444;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background-color 0.2s;
+    }
+
+    .logout-btn:hover {
+      background-color: #dc2626;
+    }
+
+    .bulk-status {
+      background: white;
+      padding: 1rem;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+      margin: 1rem;
+      max-width: 100%;
+      box-sizing: border-box;
+    }
+
+    .bulk-status label {
+      display: block;
+      font-weight: bold;
+      color: #374151;
+      margin-bottom: 0.5rem;
+    }
+
+    .bulk-status select {
+      width: 100%;
+      padding: 0.5rem;
+      border-radius: 6px;
+      border: 1px solid #d1d5db;
+      font-size: 0.9rem;
+      background-color: #f3f4f6;
+    }
+
+    .controls-container {
+      max-height: calc(100vh - 200px);
+      overflow-y: auto;
+      padding: 0 1rem;
+      margin-bottom: 1rem;
     }
 
     .faculty-card {
       background: white;
       border-radius: 10px;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
-      padding: 1rem;
-      margin-bottom: 1rem;
+      padding: 0.75rem;
+      margin-bottom: 0.75rem;
       display: flex;
       flex-direction: column;
       gap: 0.5rem;
     }
 
-    label {
+    .faculty-card label {
       font-weight: bold;
       color: #374151;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
     }
 
-    select {
+    .faculty-card img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .faculty-card select {
       padding: 0.5rem;
       border-radius: 6px;
       border: 1px solid #d1d5db;
-      font-size: 1rem;
+      font-size: 0.9rem;
       background-color: #f3f4f6;
       width: 100%;
     }
 
-    .message {
-      text-align: center;
-      font-size: 0.9rem;
-      color: green;
-      margin-top: 1rem;
+    .faculty-card button {
+      padding: 0.3rem 0.8rem;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 0.85rem;
+      border: 1px solid #e5e7eb;
+      background: #f3f4f6;
+      color: #a1a1aa;
     }
 
-    .bulk-status {
-      margin-bottom: 1.5rem;
-      background: white;
-      padding: 1rem;
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-    }
-
-    .loading {
-      color: #6b7280;
-      font-style: italic;
+    .faculty-card button:not(:disabled) {
+      border: 1px solid #fd7e14;
+      background: #fff7e6;
+      color: #b45309;
     }
 
     button:disabled {
@@ -69,35 +137,75 @@
       cursor: not-allowed;
     }
 
+    .toast {
+      position: fixed;
+      top: 1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #10b981;
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border-radius: 6px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      z-index: 100;
+      font-size: 0.9rem;
+      max-width: 90%;
+      text-align: center;
+      animation: fadeIn 0.3s ease-in-out;
+      cursor: pointer;
+    }
+
+    .toast.error {
+      background: #ef4444;
+    }
+
+    .toast.loading {
+      background: #6b7280;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translate(-50%, -20px); }
+      to { opacity: 1; transform: translate(-50%, 0); }
+    }
+
+    @keyframes fadeOut {
+      from { opacity: 1; transform: translate(-50%, 0); }
+      to { opacity: 0; transform: translate(-50%, -20px); }
+    }
+
     @media (min-width: 600px) {
       .faculty-card {
         flex-direction: row;
         align-items: center;
         justify-content: space-between;
+        padding: 1rem;
       }
 
       .bulk-status {
         max-width: 400px;
-        margin: 0 auto 2rem auto;
+        margin: 1rem auto;
       }
 
-      label {
+      .faculty-card label {
         flex: 1;
       }
 
-      select {
+      .faculty-card select {
         flex: 2;
+      }
+
+      .faculty-card button {
+        flex: 1;
+        max-width: 200px;
       }
     }
   </style>
 </head>
 
 <body>
-
-  <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem;">
+  <div class="header">
     <h2>Control Panel</h2>
-    <button onclick="logout()"
-      style="padding: 0.5rem 1rem; background-color: #ef4444; color: white; border: none; border-radius: 6px; cursor: pointer;">Logout</button>
+    <button class="logout-btn" onclick="logout()">Logout</button>
   </div>
 
   <div class="bulk-status">
@@ -107,8 +215,7 @@
     </select>
   </div>
 
-  <div id="controls"></div>
-  <div class="message" id="message"></div>
+  <div class="controls-container" id="controls"></div>
 
   <script>
     let facultyData = [];
@@ -135,8 +242,6 @@
     };
 
     const controls = document.getElementById('controls');
-    const message = document.getElementById('message');
-    const bulkStatus = document.getElementById('bulkStatus');
 
     function debounce(fn, ms) {
       let timeoutId;
@@ -147,14 +252,25 @@
     }
 
     function showMessage(text, isError = false, isLoading = false) {
-      message.textContent = text;
-      message.style.color = isError ? "red" : isLoading ? "#6b7280" : "green";
-      message.classList.toggle('loading', isLoading);
+      let toast = document.querySelector('.toast');
+      if (toast) toast.remove();
+
+      toast = document.createElement('div');
+      toast.className = `toast ${isError ? 'error' : isLoading ? 'loading' : ''}`;
+      toast.textContent = text;
+      document.body.appendChild(toast);
+
       if (!isLoading) {
         setTimeout(() => {
-          if (message.textContent === text) message.textContent = "";
-        }, 2000);
+          toast.style.animation = 'fadeOut 0.3s ease-in-out';
+          setTimeout(() => toast.remove(), 300);
+        }, 3000);
       }
+
+      toast.onclick = () => {
+        toast.style.animation = 'fadeOut 0.3s ease-in-out';
+        setTimeout(() => toast.remove(), 300);
+      };
     }
 
     function getRemainingTime(expiry) {
@@ -280,17 +396,16 @@
         const img = document.createElement("img");
         img.src = "https://faculty-status-backend.onrender.com" + f.image;
         img.alt = f.name;
-        img.style.width = "48px";
-        img.style.height = "48px";
+        img.style.width = "40px";
+        img.style.height = "40px";
         img.style.borderRadius = "50%";
         img.style.objectFit = "cover";
-        img.style.marginRight = "1rem";
 
         const label = document.createElement("label");
         label.textContent = f.name;
         label.style.display = "flex";
         label.style.alignItems = "center";
-        label.style.gap = "1rem";
+        label.style.gap = "0.5rem";
         label.prepend(img);
 
         const selectElement = document.createElement("select");
@@ -339,11 +454,11 @@
 
         const timerBtn = document.createElement("button");
         timerBtn.id = `timer-btn-${f.name}`;
-        timerBtn.style.marginLeft = "1rem";
+        timerBtn.style.marginLeft = "0";
         timerBtn.style.padding = "0.3rem 0.8rem";
         timerBtn.style.borderRadius = "6px";
         timerBtn.style.fontWeight = "bold";
-        timerBtn.style.fontSize = "0.95rem";
+        timerBtn.style.fontSize = "0.85rem";
         if (hasValidManualOverride(f)) {
           timerBtn.style.border = "1px solid #fd7e14";
           timerBtn.style.background = "#fff7e6";
@@ -425,12 +540,12 @@
         if (!bulkTimerBtn) {
           bulkTimerBtn = document.createElement("button");
           bulkTimerBtn.id = "bulk-timer-btn";
-          bulkTimerBtn.style.marginLeft = "1rem";
+          bulkTimerBtn.style.marginLeft = "0";
           bulkTimerBtn.style.padding = "0.3rem 0.8rem";
           bulkTimerBtn.style.borderRadius = "6px";
           bulkTimerBtn.style.border = "1px solid #d1d5db";
           bulkTimerBtn.style.background = "#f3f4f6";
-          bulkTimerBtn.style.fontSize = "0.95rem";
+          bulkTimerBtn.style.fontSize = "0.85rem";
           document.querySelector(".bulk-status").appendChild(bulkTimerBtn);
         }
         bulkTimerBtn.disabled = !allManual;
@@ -443,7 +558,6 @@
           bulkTimerBtn.style.color = "#b45309";
           bulkTimerBtn.disabled = false;
 
-          // Start bulk timer interval
           if (bulkTimerInterval) clearInterval(bulkTimerInterval);
           bulkTimerInterval = setInterval(() => {
             updateBulkTimer();
@@ -463,7 +577,7 @@
               f.manualOverride = null;
               f.overrideExpiry = null;
             });
-            bulkStatus.value = "";
+            document.getElementById("bulkStatus").value = "";
             render();
 
             try {
@@ -597,13 +711,11 @@
             const option = document.createElement("option");
             option.value = opt;
             option.textContent = labels[opt];
-            bulkStatus.appendChild(option);
+            document.getElementById("bulkStatus").appendChild(option);
           });
         }
       })
       .catch(() => showMessage("Failed to load data.", true));
   </script>
-
 </body>
-
 </html>
