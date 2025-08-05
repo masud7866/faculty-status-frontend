@@ -246,7 +246,7 @@
       if (typeof f.status === "object" && f.status !== null) return f.status.status;
       return f.status;
     }
-    
+
     function render() {
       // Clear previous intervals
       timerIntervals.forEach(clearInterval);
@@ -322,8 +322,16 @@
         }
 
         timerBtn.onclick = () => {
+          // Disable button immediately to prevent double clicks
+          timerBtn.disabled = true;
+
+          // Update local state immediately
           facultyData[i].manualOverride = null;
           facultyData[i].overrideExpiry = null;
+
+          // Optimistic UI update
+          render();
+
           fetch("https://faculty-status-backend.onrender.com/api/update", {
             method: "POST",
             credentials: "include",
@@ -333,16 +341,19 @@
               manualOverride: null,
               overrideExpiry: null
             }])
-          }).then(() => {
-            // Re-fetch data to get updated expiry
-            fetch("https://faculty-status-backend.onrender.com/api/faculty", { credentials: "include" })
-              .then(res => res.json())
-              .then(data => {
-                facultyData = data;
-                render();
-              });
-          });
+          })
+            .then(() => new Promise(resolve => setTimeout(resolve, 400))) // wait a bit
+            .then(() => fetch("https://faculty-status-backend.onrender.com/api/faculty", { credentials: "include" }))
+            .then(res => res.json())
+            .then(data => {
+              facultyData = data;
+              render();
+            })
+            .finally(() => {
+              timerBtn.disabled = false; // re-enable button after update
+            });
         };
+
 
         div.appendChild(label);
         div.appendChild(select);
