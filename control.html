@@ -449,31 +449,41 @@
         })))
       })
         .then(res => {
-          if (res.ok) {
-            // Re-fetch faculty data to update bulk timer button and UI
-            fetch("https://faculty-status-backend.onrender.com/api/faculty", { credentials: "include" })
-              .then(res => {
-                if (res.status === 403) {
-                  alert("Session expired. Redirecting to login...");
-                  window.location.href = "login.html";
-                  return Promise.reject("Session expired");
-                }
-                if (!res.ok) {
-                  return Promise.reject("Failed to fetch faculty data");
-                }
-                return res.json();
-              })
-              .then(data => {
-                facultyData = data;
-                render();
-                showMessage(`All faculty set to ${labels[status]}.`);
-              })
-              .catch(() => showMessage("Failed to load data.", true));
-          } else {
-            showMessage("Failed to update.", true);
+          if (res.status === 403) {
+            alert("Session expired. Redirecting to login...");
+            window.location.href = "login.html";
+            return Promise.reject("Session expired");
           }
+          if (!res.ok) {
+            return Promise.reject("Update failed");
+          }
+          return res;
         })
-        .catch(() => showMessage("Network error", true));
+        .then(() => {
+          return fetch("https://faculty-status-backend.onrender.com/api/faculty", { credentials: "include" });
+        })
+        .then(res => {
+          if (res.status === 403) {
+            alert("Session expired. Redirecting to login...");
+            window.location.href = "login.html";
+            return Promise.reject("Session expired");
+          }
+          if (!res.ok) {
+            return Promise.reject("Failed to load faculty data");
+          }
+          return res.json();
+        })
+        .then(data => {
+          facultyData = data;
+          render();
+          showMessage(`All faculty set to ${labels[status]}.`);
+        })
+        .catch(err => {
+          if (err !== "Session expired") {
+            showMessage("Failed to update or load data.", true);
+            console.error(err);
+          }
+        });
     }
 
     function logout() {
