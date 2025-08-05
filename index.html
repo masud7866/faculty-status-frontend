@@ -216,7 +216,7 @@
             console.log(f.name, statusStr, room, batch);
             let extraInfo = "";
             if (statusStr === "in_class" && room && batch) {
-              extraInfo = `<br><small class="text-gray">with ${batch} at ${room}</small>`;
+              extraInfo = `<small class="text-gray">with ${batch} at ${room}</small>`;
             }
 
             grid.innerHTML += `
