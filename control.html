@@ -201,7 +201,7 @@
         console.log("Updating status for:", updatedEntry.name, "Selected:", selected);
         console.log('Expiry set to:', expiry.toISOString(), "for status:", selected);
         console.log("Current time in Dhaka:", now.toLocaleString());
-        console.log("Current Default time:", new Date().toLocaleString());
+        console.log("Current Default time:", new Date().toISOString());
         console.log("Browser timezone offset (min):", new Date().getTimezoneOffset());
         updatedEntry.overrideExpiry = expiry.toISOString();
       }
@@ -224,18 +224,18 @@
         .catch(() => showMessage("Network error", true));
     }
 
-function getRemainingTime(expiry) {
-  if (!expiry) return "";
-  const exp = new Date(expiry); // handles ISO format like "2025-08-05T17:59:59.000Z"
-  if (isNaN(exp.getTime())) return "";
-  const now = new Date();
-  const diffMs = exp - now;
-  if (diffMs <= 0) return "Expired";
-  const mins = Math.floor(diffMs / 60000) % 60;
-  const hrs = Math.floor(diffMs / 3600000);
-  const secs = Math.floor((diffMs % 60000) / 1000);
-  return `${hrs}h ${mins}m ${secs}s`;
-}
+    function getRemainingTime(expiry) {
+      if (!expiry) return "";
+      const exp = new Date(expiry); // handles ISO format like "2025-08-05T17:59:59.000Z"
+      if (isNaN(exp.getTime())) return "";
+      const now = new Date();
+      const diffMs = exp - now;
+      if (diffMs <= 0) return "Expired";
+      const mins = Math.floor(diffMs / 60000) % 60;
+      const hrs = Math.floor(diffMs / 3600000);
+      const secs = Math.floor((diffMs % 60000) / 1000);
+      return `${hrs}h ${mins}m ${secs}s`;
+    }
 
     function render() {
       // Clear previous intervals
@@ -279,15 +279,14 @@ function getRemainingTime(expiry) {
         select.addEventListener("change", () => {
           facultyData[i].manualOverride = select.value;
           facultyData[i].status = select.value;
-          // Set expiry in Dhaka time
           const now = new Date();
           let expiry = new Date(now);
           if (["in_class", "at_dept", "in_meeting"].includes(select.value)) {
-            expiry.setHours(expiry.getHours() + 1);
+            expiry.setUTCHours(expiry.getUTCHours() + 1);
           } else {
-            expiry.setHours(23, 59, 59, 999);
+            expiry.setUTCHours(17, 59, 59, 999);
           }
-          facultyData[i].overrideExpiry = formatDhakaDate(expiry);
+          facultyData[i].overrideExpiry = expiry.toISOString();
           updateSingleFacultyOverride(i);
           render();
         });
