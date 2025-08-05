@@ -342,7 +342,7 @@
               overrideExpiry: null
             }])
           })
-            .then(() => new Promise(resolve => setTimeout(resolve, 400))) // wait a bit
+            .then(() => new Promise(resolve => setTimeout(resolve, 1000))) // wait a bit
             .then(() => fetch("https://faculty-status-backend.onrender.com/api/faculty", { credentials: "include" }))
             .then(res => res.json())
             .then(data => {
