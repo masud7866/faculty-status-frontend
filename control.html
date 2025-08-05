@@ -352,12 +352,20 @@
               }])
             });
 
-            // Small delay or directly fetch faculty data
             const facultyRes = await fetchWithSessionCheck("https://faculty-status-backend.onrender.com/api/faculty", {
               credentials: "include"
             });
             facultyData = await facultyRes.json();
             render();
+
+            // ✅ Ensure the selector reflects cleared override visually
+            setTimeout(() => {
+              const selector = document.querySelectorAll("select.status-selector")[i];
+              if (selector) {
+                selector.value = facultyData[i].manualOverride || "";
+              }
+            }, 0);
+
           } catch (err) {
             if (err.message !== "Session expired") {
               showMessage("Failed to update.", true);
@@ -367,7 +375,6 @@
             timerBtn.disabled = false;
           }
         };
-
 
         div.appendChild(label);
         div.appendChild(select);
