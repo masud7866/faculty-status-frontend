@@ -260,20 +260,6 @@
       return res;
     }
 
-    function fetchFacultyStatuses() {
-      fetch('https://faculty-status-backend.onrender.com/api/faculty')
-        .then(response => response.json())
-        .then(data => {
-          data.forEach(faculty => {
-            const select = document.getElementById(`status-${faculty.name}`);
-            if (select) {
-              select.value = faculty.manual_override.status || faculty.status;
-            }
-          });
-        })
-        .catch(error => console.error('Error fetching faculty statuses:', error));
-    }
-
     function render() {
       // Clear previous intervals
       timerIntervals.forEach(clearInterval);
@@ -371,7 +357,7 @@
             facultyData = await facultyRes.json();
 
             // Render UI with fresh data
-            fetchFacultyStatuses();
+            render();
 
           } catch (err) {
             if (err.message !== "Session expired") {
@@ -451,7 +437,7 @@
 
             // ✅ Reset dropdown and render fresh data
             bulkStatus.value = "";
-            fetchFacultyStatuses();
+            render();
             showMessage("All manual overrides cleared.");
           } catch (err) {
             if (err.message !== "Session expired") {
