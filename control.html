@@ -246,7 +246,7 @@
       if (typeof f.status === "object" && f.status !== null) return f.status.status;
       return f.status;
     }
-
+    
     function render() {
       // Clear previous intervals
       timerIntervals.forEach(clearInterval);
@@ -324,7 +324,6 @@
         timerBtn.onclick = () => {
           facultyData[i].manualOverride = null;
           facultyData[i].overrideExpiry = null;
-          render();
           fetch("https://faculty-status-backend.onrender.com/api/update", {
             method: "POST",
             credentials: "include",
