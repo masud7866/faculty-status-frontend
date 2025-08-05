@@ -242,6 +242,9 @@
       if (typeof f.status === "object" && f.status !== null) return f.status.status;
       return f.status; // fallback
     }
+    function hasValidManualOverride(f) {
+      return f.manualOverride && f.overrideExpiry && new Date(f.overrideExpiry) > new Date();
+    }
 
     function render() {
       // Clear previous intervals
@@ -284,7 +287,6 @@
 
         select.addEventListener("change", () => {
           facultyData[i].manualOverride = select.value;
-          facultyData[i].status = select.value;
           const now = new Date();
           let expiry = new Date(now);
           if (["in_class", "at_dept", "in_meeting"].includes(select.value)) {
@@ -304,7 +306,7 @@
         timerBtn.style.borderRadius = "6px";
         timerBtn.style.fontWeight = "bold";
         timerBtn.style.fontSize = "0.95rem";
-        if (f.manualOverride) {
+        if (hasValidManualOverride(f)) {
           timerBtn.style.border = "1px solid #fd7e14";
           timerBtn.style.background = "#fff7e6";
           timerBtn.style.color = "#b45309";
@@ -347,7 +349,7 @@
         controls.appendChild(div);
 
         // Update timer every second if manual override is set
-        if (f.manualOverride) {
+        if (hasValidManualOverride(f)) {
           const intervalId = setInterval(() => {
             timerBtn.textContent = `Clear manual override (${getRemainingTime(f.overrideExpiry)})`;
           }, 1000);
