@@ -242,9 +242,11 @@
       return f.manualOverride && f.overrideExpiry && new Date(f.overrideExpiry) > new Date();
     }
     function getStatusString(f) {
-      if (hasValidManualOverride(f)) return f.manualOverride;
-      if (typeof f.status === "object" && f.status !== null) return f.status.status;
-      return f.status;
+      if (hasValidManualOverride(f)) {
+        return f.manualOverride;
+      }
+      // Handle case where status is an object or a string
+      return typeof f.status === "object" && f.status !== null ? f.status.status : f.status || "";
     }
 
     async function fetchWithSessionCheck(url, options) {
@@ -287,13 +289,13 @@
 
         const select = document.createElement("select");
         select.id = `status-${f.name}`;
+        select.className = "status-selector";
         statusOptions.forEach(opt => {
           const option = document.createElement("option");
           option.value = opt;
           option.textContent = labels[opt];
 
-          const currentStatus = getStatusString(f);
-          if (currentStatus === opt) {
+          if (opt === getStatusString(f)) {
             option.selected = true;
           }
           select.appendChild(option);
@@ -357,15 +359,7 @@
             });
             facultyData = await facultyRes.json();
             render();
-
-            // ✅ Ensure the selector reflects cleared override visually
-            setTimeout(() => {
-              const selector = document.querySelectorAll("select.status-selector")[i];
-              if (selector) {
-                selector.value = facultyData[i].manualOverride || "";
-              }
-            }, 0);
-
+            showMessage("Manual override cleared.");
           } catch (err) {
             if (err.message !== "Session expired") {
               showMessage("Failed to update.", true);
