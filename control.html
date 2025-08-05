@@ -59,6 +59,16 @@
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
     }
 
+    .loading {
+      color: #6b7280;
+      font-style: italic;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
     @media (min-width: 600px) {
       .faculty-card {
         flex-direction: row;
@@ -90,7 +100,6 @@
       style="padding: 0.5rem 1rem; background-color: #ef4444; color: white; border: none; border-radius: 6px; cursor: pointer;">Logout</button>
   </div>
 
-  <!-- Bulk status dropdown -->
   <div class="bulk-status">
     <label for="bulkStatus">Set Status for All Faculty:</label>
     <select id="bulkStatus" onchange="setStatusForAll(this.value)">
@@ -104,7 +113,7 @@
   <script>
     let facultyData = [];
     let timerIntervals = [];
-    let isUpdating = false; // Lock to prevent concurrent updates
+    let isUpdating = false;
 
     const statusOptions = [
       "in_class",
@@ -128,10 +137,15 @@
     const message = document.getElementById('message');
     const bulkStatus = document.getElementById('bulkStatus');
 
-    function showMessage(text, isError = false) {
+    function showMessage(text, isError = false, isLoading = false) {
       message.textContent = text;
-      message.style.color = isError ? "red" : "green";
-      setTimeout(() => message.textContent = "", 2000);
+      message.style.color = isError ? "red" : isLoading ? "#6b7280" : "green";
+      message.classList.toggle('loading', isLoading);
+      if (!isLoading) {
+        setTimeout(() => {
+          if (message.textContent === text) message.textContent = "";
+        }, 2000);
+      }
     }
 
     function updateFacultyData() {
@@ -194,7 +208,7 @@
         updatedEntry.overrideExpiry = expiry.toISOString();
       }
 
-      fetch("https://faculty-status-backend.onrender.com/api/update", {
+      return fetch("https://faculty-status-backend.onrender.com/api/update", {
         method: "POST",
         credentials: "include",
         headers: {
@@ -203,13 +217,14 @@
         body: JSON.stringify([updatedEntry])
       })
         .then(res => {
-          if (res.ok) showMessage("Manual override updated.");
-          else if (res.status === 403) {
+          if (res.ok) return;
+          if (res.status === 403) {
             alert("Session expired. Redirecting to login...");
             window.location.href = "login.html";
-          } else showMessage("Failed to update.", true);
-        })
-        .catch(() => showMessage("Network error", true));
+            throw new Error("Session expired");
+          }
+          throw new Error("Failed to update");
+        });
     }
 
     function getRemainingTime(expiry) {
@@ -254,9 +269,9 @@
         const res = await fetchWithSessionCheck("https://faculty-status-backend.onrender.com/api/faculty", {
           credentials: "include"
         });
-        facultyData = await res.json();
-        console.log("Fetched facultyData:", facultyData); // Debug
-        return facultyData;
+        const data = await res.json();
+        console.log("Fetched facultyData:", data);
+        return data;
       } catch (err) {
         if (err.message !== "Session expired") {
           showMessage("Failed to fetch faculty data.", true);
@@ -273,15 +288,7 @@
       }
       isUpdating = true;
 
-      // Fetch latest data before rendering
-      const freshData = await fetchFacultyData();
-      if (!freshData) {
-        isUpdating = false;
-        return;
-      }
-      facultyData = freshData;
-
-      // Clear previous intervals and controls
+      // Optimistic UI update without fetching
       timerIntervals.forEach(clearInterval);
       timerIntervals = [];
       controls.innerHTML = "";
@@ -320,8 +327,9 @@
         });
 
         select.addEventListener("change", async () => {
-          if (isUpdating) return; // Prevent concurrent updates
+          if (isUpdating) return;
           isUpdating = true;
+          showMessage("Updating status...", false, true);
           const newValue = select.value;
           facultyData[i].manualOverride = newValue;
           const now = new Date();
@@ -332,10 +340,16 @@
             expiry.setUTCHours(17, 59, 59, 999);
           }
           facultyData[i].overrideExpiry = expiry.toISOString();
-          await updateSingleFacultyOverride(i);
-          await fetchFacultyData();
-          render();
-          isUpdating = false;
+          try {
+            await updateSingleFacultyOverride(i);
+            await fetchFacultyData();
+            render();
+            showMessage("Status updated.");
+          } catch (err) {
+            showMessage("Failed to update status.", true);
+          } finally {
+            isUpdating = false;
+          }
         });
 
         const timerBtn = document.createElement("button");
@@ -362,9 +376,10 @@
           if (isUpdating) return;
           isUpdating = true;
           timerBtn.disabled = true;
+          showMessage("Clearing manual override...", false, true);
           facultyData[i].manualOverride = null;
           facultyData[i].overrideExpiry = null;
-          render(); // Optimistic UI update
+          render();
 
           try {
             await fetchWithSessionCheck("https://faculty-status-backend.onrender.com/api/update", {
@@ -378,21 +393,21 @@
               }])
             });
 
-            await fetchFacultyData();
-            render();
-
-            // Force selector value to match backend status
-            const selector = document.getElementById(`status-${f.name}`);
-            if (selector) {
-              const status = getStatusString(facultyData[i]);
-              selector.value = status;
-              console.log(`Set selector for ${f.name} to ${status}`); // Debug
+            const freshData = await fetchFacultyData();
+            if (freshData) {
+              facultyData = freshData;
+              render();
+              const selector = document.getElementById(`status-${f.name}`);
+              if (selector) {
+                const status = getStatusString(facultyData[i]);
+                selector.value = status;
+                console.log(`Set selector for ${f.name} to ${status}`);
+              }
+              showMessage("Manual override cleared.");
             }
-
-            showMessage("Manual override cleared.");
           } catch (err) {
             if (err.message !== "Session expired") {
-              showMessage("Failed to update.", true);
+              showMessage("Failed to clear override.", true);
               console.error(err);
             }
           } finally {
@@ -419,7 +434,6 @@
         }
       });
 
-      // Bulk timer button
       let allManual = facultyData.every(f => !!f.manualOverride);
       let bulkTimerBtn = document.getElementById("bulk-timer-btn");
       if (!bulkTimerBtn) {
@@ -447,16 +461,15 @@
           if (isUpdating) return;
           isUpdating = true;
           bulkTimerBtn.disabled = true;
-          bulkTimerBtn.textContent = "Clearing...";
+          showMessage("Clearing all manual overrides...", false, true);
+          facultyData.forEach(f => {
+            f.manualOverride = null;
+            f.overrideExpiry = null;
+          });
+          bulkStatus.value = "";
+          render();
 
           try {
-            facultyData.forEach(f => {
-              f.manualOverride = null;
-              f.overrideExpiry = null;
-            });
-            bulkStatus.value = "";
-            render(); // Optimistic UI update
-
             await fetchWithSessionCheck("https://faculty-status-backend.onrender.com/api/update", {
               method: "POST",
               credentials: "include",
@@ -468,23 +481,23 @@
               })))
             });
 
-            await fetchFacultyData();
-            render();
-
-            // Force all selectors to match backend status
-            facultyData.forEach((f, i) => {
-              const selector = document.getElementById(`status-${f.name}`);
-              if (selector) {
-                const status = getStatusString(f);
-                selector.value = status;
-                console.log(`Set bulk selector for ${f.name} to ${status}`); // Debug
-              }
-            });
-
-            showMessage("All manual overrides cleared.");
+            const freshData = await fetchFacultyData();
+            if (freshData) {
+              facultyData = freshData;
+              render();
+              facultyData.forEach((f, i) => {
+                const selector = document.getElementById(`status-${f.name}`);
+                if (selector) {
+                  const status = getStatusString(f);
+                  selector.value = status;
+                  console.log(`Set bulk selector for ${f.name} to ${status}`);
+                }
+              });
+              showMessage("All manual overrides cleared.");
+            }
           } catch (err) {
             if (err.message !== "Session expired") {
-              showMessage("Failed to clear manual overrides.", true);
+              showMessage("Failed to clear overrides.", true);
               console.error(err);
             }
           } finally {
@@ -507,6 +520,7 @@
     function setStatusForAll(status) {
       if (!status || isUpdating) return;
       isUpdating = true;
+      showMessage(`Setting all faculty to ${labels[status]}...`, false, true);
       const now = new Date();
       let expiry = new Date(now);
       if (["in_class", "at_dept", "in_meeting"].includes(status)) {
@@ -521,6 +535,7 @@
         const select = document.getElementById(`status-${f.name}`);
         if (select) select.value = status;
       });
+      render();
 
       fetch("https://faculty-status-backend.onrender.com/api/update", {
         method: "POST",
@@ -545,21 +560,25 @@
         })
         .then(() => fetchFacultyData())
         .then(data => {
-          facultyData = data;
-          render();
-          showMessage(`All faculty set to ${labels[status]}.`);
-          isUpdating = false;
+          if (data) {
+            facultyData = data;
+            render();
+            showMessage(`All faculty set to ${labels[status]}.`);
+          }
         })
         .catch(err => {
           if (err !== "Session expired") {
             showMessage("Failed to update or load data.", true);
             console.error(err);
           }
+        })
+        .finally(() => {
           isUpdating = false;
         });
     }
 
     function logout() {
+      showMessage("Logging out...", false, true);
       fetch("https://faculty-status-backend.onrender.com/api/logout", {
         method: "POST",
         credentials: "include"
@@ -570,32 +589,32 @@
               window.location.href = "login.html";
             }, 300);
           } else {
-            alert("Logout failed.");
+            showMessage("Logout failed.", true);
           }
         })
-        .catch(() => alert("Logout error."));
+        .catch(() => showMessage("Logout error.", true));
     }
 
-    // Polling to sync with backend every 3 seconds
     function startPolling() {
       setInterval(async () => {
         if (!isUpdating) {
-          await fetchFacultyData();
-          render();
-          console.log("Polled facultyData:", facultyData); // Debug
+          const freshData = await fetchFacultyData();
+          if (freshData) {
+            facultyData = freshData;
+            render();
+            console.log("Polled facultyData:", facultyData);
+          }
         }
       }, 3000);
     }
 
-    // Initialize
     fetchFacultyData()
       .then(data => {
         if (data) {
           facultyData = data;
           render();
-          startPolling(); // Start polling after initial load
+          startPolling();
 
-          // Populate bulk dropdown
           statusOptions.forEach(opt => {
             const option = document.createElement("option");
             option.value = opt;
