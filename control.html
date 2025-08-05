@@ -113,6 +113,7 @@
   <script>
     let facultyData = [];
     let timerIntervals = [];
+    let bulkTimerInterval = null;
     let isUpdating = false;
 
     const statusOptions = [
@@ -178,6 +179,16 @@
         return f.manualOverride;
       }
       return typeof f.status === "object" && f.status !== null ? f.status.status : f.status || "";
+    }
+
+    function updateBulkTimer() {
+      const bulkTimerBtn = document.getElementById("bulk-timer-btn");
+      if (!bulkTimerBtn) return;
+      const allManual = facultyData.every(f => !!f.manualOverride);
+      if (allManual) {
+        const times = facultyData.map(f => getRemainingTime(f.overrideExpiry)).filter(t => t !== "Expired");
+        bulkTimerBtn.textContent = "Clear all manual overrides (" + (times.length ? times.sort()[0] : "Expired") + ")";
+      }
     }
 
     async function fetchWithSessionCheck(url, options) {
@@ -394,7 +405,7 @@
                 render(i);
               }
             }
-          }, 1000); // Changed to 1 second
+          }, 1000);
           timerIntervals.push(intervalId);
         }
       };
@@ -425,12 +436,23 @@
         bulkTimerBtn.disabled = !allManual;
 
         if (allManual) {
-          const times = facultyData.map(f => getRemainingTime(f.overrideExpiry));
-          bulkTimerBtn.textContent = "Clear all manual overrides (" + (times.length ? times.sort()[0] : "") + ")";
+          const times = facultyData.map(f => getRemainingTime(f.overrideExpiry)).filter(t => t !== "Expired");
+          bulkTimerBtn.textContent = "Clear all manual overrides (" + (times.length ? times.sort()[0] : "Expired") + ")";
           bulkTimerBtn.style.border = "1px solid #fd7e14";
           bulkTimerBtn.style.background = "#fff7e6";
           bulkTimerBtn.style.color = "#b45309";
           bulkTimerBtn.disabled = false;
+
+          // Start bulk timer interval
+          if (bulkTimerInterval) clearInterval(bulkTimerInterval);
+          bulkTimerInterval = setInterval(() => {
+            updateBulkTimer();
+            if (!facultyData.every(f => hasValidManualOverride(f))) {
+              clearInterval(bulkTimerInterval);
+              bulkTimerInterval = null;
+              render();
+            }
+          }, 1000);
 
           bulkTimerBtn.onclick = async () => {
             if (isUpdating) return;
@@ -479,6 +501,10 @@
           bulkTimerBtn.style.color = "#a1a1aa";
           bulkTimerBtn.disabled = true;
           bulkTimerBtn.onclick = null;
+          if (bulkTimerInterval) {
+            clearInterval(bulkTimerInterval);
+            bulkTimerInterval = null;
+          }
         }
 
         isUpdating = false;
