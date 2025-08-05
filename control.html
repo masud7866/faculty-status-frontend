@@ -452,7 +452,17 @@
           if (res.ok) {
             // Re-fetch faculty data to update bulk timer button and UI
             fetch("https://faculty-status-backend.onrender.com/api/faculty", { credentials: "include" })
-              .then(res => res.json())
+              .then(res => {
+                if (res.status === 403) {
+                  alert("Session expired. Redirecting to login...");
+                  window.location.href = "login.html";
+                  return Promise.reject("Session expired");
+                }
+                if (!res.ok) {
+                  return Promise.reject("Failed to fetch faculty data");
+                }
+                return res.json();
+              })
               .then(data => {
                 facultyData = data;
                 render();
