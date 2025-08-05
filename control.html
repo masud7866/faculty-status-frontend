@@ -103,24 +103,7 @@
 
   <script>
     function formatDhakaDate(date) {
-      const options = {
-        timeZone: "Asia/Dhaka",
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        hour12: false
-      };
-      let parts = new Intl.DateTimeFormat('en-GB', options).formatToParts(date);
-      let day = parts.find(p => p.type === 'day').value;
-      let month = parts.find(p => p.type === 'month').value;
-      let year = parts.find(p => p.type === 'year').value;
-      let hour = parts.find(p => p.type === 'hour').value;
-      let minute = parts.find(p => p.type === 'minute').value;
-      let second = parts.find(p => p.type === 'second').value;
-      return `${day}/${month}/${year}, ${hour}:${minute}:${second}`;
+      return new Date(date.toLocaleString('en-GB', { timeZone: 'Asia/Dhaka' })).toISOString();
     }
 
     let facultyData = [];
@@ -177,10 +160,10 @@
             expiry.setHours(23, 59, 59, 999); // Until end of day
           }
           console.log("Updating status for:", updatedEntry.name, "Selected:", selected);
-          console.log('Expiry set to:', formatDhakaDate(expiry), "for status:", selected);
+          console.log('Expiry set to:', expiry.toISOString(), "for status:", selected);
           console.log("Current time in Dhaka:", now.toLocaleString());
-          console.log("Current Default time:", new Date().toLocaleString());
-          updatedEntry.overrideExpiry = formatDhakaDate(expiry);
+          console.log("Current Default time:", new Date().toISOString());
+          updatedEntry.overrideExpiry = expiry.toISOString();
         }
 
         return updatedEntry;
@@ -220,11 +203,11 @@
           expiry.setHours(23, 59, 59, 999); // Until end of day
         }
         console.log("Updating status for:", updatedEntry.name, "Selected:", selected);
-        console.log('Expiry set to:', formatDhakaDate(expiry), "for status:", selected);
+        console.log('Expiry set to:', expiry.toISOString(), "for status:", selected);
         console.log("Current time in Dhaka:", now.toLocaleString());
         console.log("Current Default time:", new Date().toLocaleString());
         console.log("Browser timezone offset (min):", new Date().getTimezoneOffset());
-        updatedEntry.overrideExpiry = formatDhakaDate(expiry);
+        updatedEntry.overrideExpiry = expiry.toISOString();
       }
 
       fetch("https://faculty-status-backend.onrender.com/api/update", {
