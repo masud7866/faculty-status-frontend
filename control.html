@@ -137,6 +137,14 @@
     const message = document.getElementById('message');
     const bulkStatus = document.getElementById('bulkStatus');
 
+    function debounce(fn, ms) {
+      let timeoutId;
+      return (...args) => {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => fn(...args), ms);
+      };
+    }
+
     function showMessage(text, isError = false, isLoading = false) {
       message.textContent = text;
       message.style.color = isError ? "red" : isLoading ? "#6b7280" : "green";
@@ -146,85 +154,6 @@
           if (message.textContent === text) message.textContent = "";
         }, 2000);
       }
-    }
-
-    function updateFacultyData() {
-      const now = new Date();
-      const updated = facultyData.map((f) => {
-        const sel = document.getElementById(`status-${f.name}`);
-        const updatedEntry = { name: f.name };
-        if (!sel) {
-          console.warn(`Selector not found for: status-${f.name}`);
-          return updatedEntry;
-        }
-        const selected = sel.value;
-
-        if (selected) {
-          updatedEntry.manualOverride = selected;
-          const expiry = new Date(now);
-          if (["in_class", "at_dept", "in_meeting"].includes(selected)) {
-            expiry.setUTCHours(expiry.getUTCHours() + 1);
-          } else {
-            expiry.setUTCHours(17, 59, 59, 999);
-          }
-          updatedEntry.overrideExpiry = expiry.toISOString();
-        }
-        return updatedEntry;
-      });
-
-      fetch("https://faculty-status-backend.onrender.com/api/update", {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(updated)
-      })
-        .then(res => {
-          if (res.ok) showMessage("Manual override updated.");
-          else if (res.status === 403) {
-            alert("Session expired. Redirecting to login...");
-            window.location.href = "login.html";
-          } else showMessage("Failed to update.", true);
-        })
-        .catch(() => showMessage("Network error", true));
-    }
-
-    function updateSingleFacultyOverride(idx) {
-      const now = new Date();
-      const f = facultyData[idx];
-      const sel = document.getElementById(`status-${f.name}`);
-      const selected = sel.value;
-
-      const updatedEntry = { name: f.name };
-      if (selected) {
-        updatedEntry.manualOverride = selected;
-        const expiry = new Date(now);
-        if (["in_class", "at_dept", "in_meeting"].includes(selected)) {
-          expiry.setUTCHours(expiry.getUTCHours() + 1);
-        } else {
-          expiry.setUTCHours(17, 59, 59, 999);
-        }
-        updatedEntry.overrideExpiry = expiry.toISOString();
-      }
-
-      return fetch("https://faculty-status-backend.onrender.com/api/update", {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify([updatedEntry])
-      })
-        .then(res => {
-          if (res.ok) return;
-          if (res.status === 403) {
-            alert("Session expired. Redirecting to login...");
-            window.location.href = "login.html";
-            throw new Error("Session expired");
-          }
-          throw new Error("Failed to update");
-        });
     }
 
     function getRemainingTime(expiry) {
@@ -281,22 +210,62 @@
       }
     }
 
-    async function render() {
+    async function updateFaculty(updates) {
+      try {
+        await fetchWithSessionCheck("https://faculty-status-backend.onrender.com/api/update", {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updates)
+        });
+      } catch (err) {
+        if (err.message !== "Session expired") {
+          throw err;
+        }
+      }
+    }
+
+    const render = debounce((specificIndex = null) => {
       if (isUpdating) {
         console.log("Render skipped due to ongoing update");
         return;
       }
       isUpdating = true;
 
-      // Optimistic UI update without fetching
-      timerIntervals.forEach(clearInterval);
-      timerIntervals = [];
-      controls.innerHTML = "";
+      const renderFaculty = (f, i) => {
+        let div = document.getElementById(`faculty-card-${f.name}`);
+        const isNew = !div;
+        if (isNew) {
+          div = document.createElement("div");
+          div.id = `faculty-card-${f.name}`;
+          div.className = "faculty-card";
+          controls.appendChild(div);
+        }
 
-      facultyData.forEach((f, i) => {
-        const div = document.createElement("div");
-        div.className = "faculty-card";
+        const currentStatus = getStatusString(f);
+        const select = document.getElementById(`status-${f.name}`);
+        if (select && select.value === currentStatus && !isNew) {
+          // Skip full render if status unchanged
+          const timerBtn = document.getElementById(`timer-btn-${f.name}`);
+          if (timerBtn) {
+            if (hasValidManualOverride(f)) {
+              timerBtn.style.border = "1px solid #fd7e14";
+              timerBtn.style.background = "#fff7e6";
+              timerBtn.style.color = "#b45309";
+              timerBtn.disabled = false;
+              timerBtn.textContent = `Clear manual override (${getRemainingTime(f.overrideExpiry)})`;
+            } else {
+              timerBtn.style.border = "1px solid #e5e7eb";
+              timerBtn.style.background = "#f3f4f6";
+              timerBtn.style.color = "#a1a1aa";
+              timerBtn.disabled = true;
+              timerBtn.textContent = "No manual override";
+            }
+          }
+          return;
+        }
 
+        div.innerHTML = "";
         const img = document.createElement("img");
         img.src = "https://faculty-status-backend.onrender.com" + f.image;
         img.alt = f.name;
@@ -313,24 +282,24 @@
         label.style.gap = "1rem";
         label.prepend(img);
 
-        const select = document.createElement("select");
-        select.id = `status-${f.name}`;
-        select.className = "status-selector";
+        const selectElement = document.createElement("select");
+        selectElement.id = `status-${f.name}`;
+        selectElement.className = "status-selector";
         statusOptions.forEach(opt => {
           const option = document.createElement("option");
           option.value = opt;
           option.textContent = labels[opt];
-          if (opt === getStatusString(f)) {
+          if (opt === currentStatus) {
             option.selected = true;
           }
-          select.appendChild(option);
+          selectElement.appendChild(option);
         });
 
-        select.addEventListener("change", async () => {
+        selectElement.addEventListener("change", async () => {
           if (isUpdating) return;
           isUpdating = true;
           showMessage("Updating status...", false, true);
-          const newValue = select.value;
+          const newValue = selectElement.value;
           facultyData[i].manualOverride = newValue;
           const now = new Date();
           let expiry = new Date(now);
@@ -340,19 +309,25 @@
             expiry.setUTCHours(17, 59, 59, 999);
           }
           facultyData[i].overrideExpiry = expiry.toISOString();
+
           try {
-            await updateSingleFacultyOverride(i);
-            await fetchFacultyData();
-            render();
-            showMessage("Status updated.");
+            await updateFaculty([{ name: f.name, manualOverride: newValue, overrideExpiry: expiry.toISOString() }]);
+            const freshData = await fetchFacultyData();
+            if (freshData) {
+              facultyData = freshData;
+              render(i);
+              showMessage("Status updated.");
+            }
           } catch (err) {
             showMessage("Failed to update status.", true);
+            console.error(err);
           } finally {
             isUpdating = false;
           }
         });
 
         const timerBtn = document.createElement("button");
+        timerBtn.id = `timer-btn-${f.name}`;
         timerBtn.style.marginLeft = "1rem";
         timerBtn.style.padding = "0.3rem 0.8rem";
         timerBtn.style.borderRadius = "6px";
@@ -379,24 +354,14 @@
           showMessage("Clearing manual override...", false, true);
           facultyData[i].manualOverride = null;
           facultyData[i].overrideExpiry = null;
-          render();
+          render(i);
 
           try {
-            await fetchWithSessionCheck("https://faculty-status-backend.onrender.com/api/update", {
-              method: "POST",
-              credentials: "include",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify([{
-                name: f.name,
-                manualOverride: null,
-                overrideExpiry: null
-              }])
-            });
-
+            await updateFaculty([{ name: f.name, manualOverride: null, overrideExpiry: null }]);
             const freshData = await fetchFacultyData();
             if (freshData) {
               facultyData = freshData;
-              render();
+              render(i);
               const selector = document.getElementById(`status-${f.name}`);
               if (selector) {
                 const status = getStatusString(facultyData[i]);
@@ -406,10 +371,8 @@
               showMessage("Manual override cleared.");
             }
           } catch (err) {
-            if (err.message !== "Session expired") {
-              showMessage("Failed to clear override.", true);
-              console.error(err);
-            }
+            showMessage("Failed to clear override.", true);
+            console.error(err);
           } finally {
             timerBtn.disabled = false;
             isUpdating = false;
@@ -417,105 +380,110 @@
         };
 
         div.appendChild(label);
-        div.appendChild(select);
+        div.appendChild(selectElement);
         div.appendChild(timerBtn);
-        controls.appendChild(div);
 
         if (hasValidManualOverride(f)) {
           const intervalId = setInterval(() => {
-            timerBtn.textContent = `Clear manual override (${getRemainingTime(f.overrideExpiry)})`;
-            if (!hasValidManualOverride(f)) {
-              clearInterval(intervalId);
-              timerIntervals = timerIntervals.filter(id => id !== intervalId);
-              render();
+            const btn = document.getElementById(`timer-btn-${f.name}`);
+            if (btn) {
+              btn.textContent = `Clear manual override (${getRemainingTime(f.overrideExpiry)})`;
+              if (!hasValidManualOverride(f)) {
+                clearInterval(intervalId);
+                timerIntervals = timerIntervals.filter(id => id !== intervalId);
+                render(i);
+              }
             }
-          }, 1000);
+          }, 5000);
           timerIntervals.push(intervalId);
         }
-      });
+      };
 
-      let allManual = facultyData.every(f => !!f.manualOverride);
-      let bulkTimerBtn = document.getElementById("bulk-timer-btn");
-      if (!bulkTimerBtn) {
-        bulkTimerBtn = document.createElement("button");
-        bulkTimerBtn.id = "bulk-timer-btn";
-        bulkTimerBtn.style.marginLeft = "1rem";
-        bulkTimerBtn.style.padding = "0.3rem 0.8rem";
-        bulkTimerBtn.style.borderRadius = "6px";
-        bulkTimerBtn.style.border = "1px solid #d1d5db";
-        bulkTimerBtn.style.background = "#f3f4f6";
-        bulkTimerBtn.style.fontSize = "0.95rem";
-        document.querySelector(".bulk-status").appendChild(bulkTimerBtn);
-      }
-      bulkTimerBtn.disabled = !allManual;
+      requestAnimationFrame(() => {
+        timerIntervals.forEach(clearInterval);
+        timerIntervals = [];
+        if (specificIndex !== null) {
+          renderFaculty(facultyData[specificIndex], specificIndex);
+        } else {
+          controls.innerHTML = "";
+          facultyData.forEach(renderFaculty);
+        }
 
-      if (allManual) {
-        const times = facultyData.map(f => getRemainingTime(f.overrideExpiry));
-        bulkTimerBtn.textContent = "Clear all manual overrides (" + (times.length ? times.sort()[0] : "") + ")";
-        bulkTimerBtn.style.border = "1px solid #fd7e14";
-        bulkTimerBtn.style.background = "#fff7e6";
-        bulkTimerBtn.style.color = "#b45309";
-        bulkTimerBtn.disabled = false;
+        let allManual = facultyData.every(f => !!f.manualOverride);
+        let bulkTimerBtn = document.getElementById("bulk-timer-btn");
+        if (!bulkTimerBtn) {
+          bulkTimerBtn = document.createElement("button");
+          bulkTimerBtn.id = "bulk-timer-btn";
+          bulkTimerBtn.style.marginLeft = "1rem";
+          bulkTimerBtn.style.padding = "0.3rem 0.8rem";
+          bulkTimerBtn.style.borderRadius = "6px";
+          bulkTimerBtn.style.border = "1px solid #d1d5db";
+          bulkTimerBtn.style.background = "#f3f4f6";
+          bulkTimerBtn.style.fontSize = "0.95rem";
+          document.querySelector(".bulk-status").appendChild(bulkTimerBtn);
+        }
+        bulkTimerBtn.disabled = !allManual;
 
-        bulkTimerBtn.onclick = async () => {
-          if (isUpdating) return;
-          isUpdating = true;
-          bulkTimerBtn.disabled = true;
-          showMessage("Clearing all manual overrides...", false, true);
-          facultyData.forEach(f => {
-            f.manualOverride = null;
-            f.overrideExpiry = null;
-          });
-          bulkStatus.value = "";
-          render();
+        if (allManual) {
+          const times = facultyData.map(f => getRemainingTime(f.overrideExpiry));
+          bulkTimerBtn.textContent = "Clear all manual overrides (" + (times.length ? times.sort()[0] : "") + ")";
+          bulkTimerBtn.style.border = "1px solid #fd7e14";
+          bulkTimerBtn.style.background = "#fff7e6";
+          bulkTimerBtn.style.color = "#b45309";
+          bulkTimerBtn.disabled = false;
 
-          try {
-            await fetchWithSessionCheck("https://faculty-status-backend.onrender.com/api/update", {
-              method: "POST",
-              credentials: "include",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(facultyData.map(f => ({
+          bulkTimerBtn.onclick = async () => {
+            if (isUpdating) return;
+            isUpdating = true;
+            bulkTimerBtn.disabled = true;
+            showMessage("Clearing all manual overrides...", false, true);
+            facultyData.forEach(f => {
+              f.manualOverride = null;
+              f.overrideExpiry = null;
+            });
+            bulkStatus.value = "";
+            render();
+
+            try {
+              await updateFaculty(facultyData.map(f => ({
                 name: f.name,
                 manualOverride: null,
                 overrideExpiry: null
-              })))
-            });
-
-            const freshData = await fetchFacultyData();
-            if (freshData) {
-              facultyData = freshData;
-              render();
-              facultyData.forEach((f, i) => {
-                const selector = document.getElementById(`status-${f.name}`);
-                if (selector) {
-                  const status = getStatusString(f);
-                  selector.value = status;
-                  console.log(`Set bulk selector for ${f.name} to ${status}`);
-                }
-              });
-              showMessage("All manual overrides cleared.");
-            }
-          } catch (err) {
-            if (err.message !== "Session expired") {
+              })));
+              const freshData = await fetchFacultyData();
+              if (freshData) {
+                facultyData = freshData;
+                render();
+                facultyData.forEach((f, i) => {
+                  const selector = document.getElementById(`status-${f.name}`);
+                  if (selector) {
+                    const status = getStatusString(f);
+                    selector.value = status;
+                    console.log(`Set bulk selector for ${f.name} to ${status}`);
+                  }
+                });
+                showMessage("All manual overrides cleared.");
+              }
+            } catch (err) {
               showMessage("Failed to clear overrides.", true);
               console.error(err);
+            } finally {
+              bulkTimerBtn.disabled = false;
+              isUpdating = false;
             }
-          } finally {
-            bulkTimerBtn.disabled = false;
-            isUpdating = false;
-          }
-        };
-      } else {
-        bulkTimerBtn.textContent = "Clear all manual overrides";
-        bulkTimerBtn.style.border = "1px solid #e5e7eb";
-        bulkTimerBtn.style.background = "#f3f4f6";
-        bulkTimerBtn.style.color = "#a1a1aa";
-        bulkTimerBtn.disabled = true;
-        bulkTimerBtn.onclick = null;
-      }
+          };
+        } else {
+          bulkTimerBtn.textContent = "Clear all manual overrides";
+          bulkTimerBtn.style.border = "1px solid #e5e7eb";
+          bulkTimerBtn.style.background = "#f3f4f6";
+          bulkTimerBtn.style.color = "#a1a1aa";
+          bulkTimerBtn.disabled = true;
+          bulkTimerBtn.onclick = null;
+        }
 
-      isUpdating = false;
-    }
+        isUpdating = false;
+      });
+    }, 50);
 
     function setStatusForAll(status) {
       if (!status || isUpdating) return;
@@ -537,37 +505,21 @@
       });
       render();
 
-      fetch("https://faculty-status-backend.onrender.com/api/update", {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(facultyData.map(f => ({
-          name: f.name,
-          manualOverride: f.manualOverride,
-          overrideExpiry: f.overrideExpiry
-        })))
-      })
-        .then(res => {
-          if (res.status === 403) {
-            alert("Session expired. Redirecting to login...");
-            window.location.href = "login.html";
-            return Promise.reject("Session expired");
-          }
-          if (!res.ok) {
-            return Promise.reject("Update failed");
-          }
-          return res;
-        })
-        .then(() => fetchFacultyData())
-        .then(data => {
-          if (data) {
-            facultyData = data;
+      updateFaculty(facultyData.map(f => ({
+        name: f.name,
+        manualOverride: f.manualOverride,
+        overrideExpiry: f.overrideExpiry
+      })))
+        .then(async () => {
+          const freshData = await fetchFacultyData();
+          if (freshData) {
+            facultyData = freshData;
             render();
             showMessage(`All faculty set to ${labels[status]}.`);
           }
         })
         .catch(err => {
-          if (err !== "Session expired") {
+          if (err.message !== "Session expired") {
             showMessage("Failed to update or load data.", true);
             console.error(err);
           }
@@ -605,7 +557,7 @@
             console.log("Polled facultyData:", facultyData);
           }
         }
-      }, 3000);
+      }, 6000);
     }
 
     fetchFacultyData()
