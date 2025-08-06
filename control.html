@@ -393,7 +393,7 @@
       const res = await fetch(url, options);
       if (res.status === 403) {
         alert("Session expired. Redirecting to login...");
-        window.location.href = "login.html";
+        window.location.href = "login";
         throw new Error("Session expired");
       }
       if (!res.ok) {
@@ -765,7 +765,7 @@
         .then(res => {
           if (res.ok) {
             setTimeout(() => {
-              window.location.href = "login.html";
+              window.location.href = "login";
             }, 300);
           } else {
             showMessage("Logout failed.", true);

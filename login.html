@@ -121,7 +121,7 @@
         })
         .then(data => {
           if (data.loggedIn) {
-            window.location.href = "control.html";
+            window.location.href = "control";
           }
         })
         .catch(err => {
@@ -141,7 +141,7 @@
         body: JSON.stringify({ username, password })
       }).then(res => {
         if (res.ok) {
-          window.location.href = "control.html";
+          window.location.href = "control";
         } else {
           document.getElementById("errorMsg").textContent = "Invalid credentials!";
         }
