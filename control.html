@@ -81,6 +81,49 @@
       outline: none;
     }
 
+    /* Desktop-friendly grid (replaces tall single column) */
+    .controls-container {
+      padding: .75rem;
+      display: grid;
+      gap: .6rem;
+      grid-auto-rows: 1fr;
+    }
+    @media (min-width: 900px) {
+      .controls-container {
+        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+        max-height: calc(100vh - 160px);
+        overflow-y: auto;
+      }
+      body { overflow-y: hidden; }
+    }
+
+    .faculty-card {
+      display: flex;
+      flex-direction: column;
+      gap: .45rem;
+      min-height: 160px;
+    }
+    @media (min-width: 900px) {
+      .faculty-card {
+        padding: .9rem .85rem;
+      }
+    }
+
+    .faculty-main-row {
+      display: flex;
+      align-items: center;
+      gap: .55rem;
+    }
+    .faculty-main-row .status-wrap {
+      flex: 1;
+      display: flex;
+      gap: .4rem;
+      align-items: center;
+    }
+    .faculty-main-row select {
+      flex: 1;
+    }
+
     .controls-container {
       max-height: calc(100vh - 180px);
       overflow-y: auto;
@@ -306,20 +349,57 @@
     }
     .mini-btn:disabled { opacity:.55; cursor:not-allowed; }
     .expiry-row {
-      display:flex;
-      flex-direction:column;
-      gap:.35rem;
-      font-size:.65rem;
-      color:#6b7280;
-      margin-top:.25rem;
+      margin-top: .1rem;
+      display: flex;
+      flex-direction: column;
+      gap: .35rem;
+      font-size: .63rem;
+    }
+    .expiry-inputs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .4rem;
+      align-items: center;
+    }
+    .expiry-inputs input[type=date],
+    .expiry-inputs input[type=time] {
+      padding: .3rem .4rem;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      background: #f3f4f6;
+      font-size: .7rem;
+      min-width: 120px;
+    }
+    .expiry-inputs input:focus {
+      border-color: #3b82f6;
+      outline: none;
+      background: #fff;
+    }
+    .override-clear-btn {
+      padding: .32rem .55rem;
+      font-size: .65rem;
+      border-radius: 6px;
+      border: 1px solid #dc2626;
+      background: #dc2626;
+      color: #fff;
+      cursor: pointer;
+    }
+    .override-clear-btn:disabled {
+      opacity: .55;
+      cursor: not-allowed;
     }
     .expiry-active-indicator {
-      font-size:.6rem;
-      color:#b45309;
-      background:#fff7e6;
-      padding:.15rem .4rem;
-      border-radius:4px;
-      display:inline-block;
+      font-size: .6rem;
+      color: #b45309;
+      background: #fff7e6;
+      padding: .15rem .4rem;
+      border-radius: 4px;
+      display: inline-block;
+    }
+
+    /* Toast stacking tweak so fewer overlaps on wider screens */
+    @media (min-width: 900px) {
+      .toast { top: 1rem !important; }
     }
   </style>
 </head>
@@ -523,186 +603,218 @@
       }
     });
 
+    /* Utility: combine date + time (local) */
+    function combineDateTime(dateStr, timeStr) {
+      if (!dateStr && !timeStr) return null;
+      const now = new Date();
+      let d, t;
+      if (dateStr) d = dateStr;
+      else {
+        // fallback to today
+        d = now.toISOString().slice(0,10);
+      }
+      if (timeStr) t = timeStr;
+      else {
+        // default keep current time
+        t = now.toTimeString().slice(0,5);
+      }
+      // Construct local datetime
+      const combined = new Date(`${d}T${t}`);
+      return isNaN(combined.getTime()) ? null : combined;
+    }
+
+    /* Override: compute default expiry (unchanged) */
     function computeDefaultExpiry(status, now = new Date()) {
       const expiry = new Date(now);
       if (["in_class","at_dept","in_meeting"].includes(status)) {
-        expiry.setUTCHours(expiry.getUTCHours() + 1);
+        expiry.setHours(expiry.getHours() + 1);
       } else {
-        // End of (local) office day ~ adjust as needed
-        expiry.setUTCHours(17, 59, 59, 999);
+        // End of day (local)
+        expiry.setHours(23, 59, 59, 999);
       }
       return expiry;
     }
 
-    function getCustomExpiryValue(inputValue) {
-      if(!inputValue) return null;
-      const d = new Date(inputValue);
-      if(isNaN(d.getTime())) return null;
-      if(d < new Date()) return null;
-      return d;
-    }
-
-    /* === Modified render: add per-faculty custom expiry UI === */
+    /* === UPDATED render (no Apply/Clear expiry buttons, live update) === */
     const render = debounce((specificIndex = null) => {
       if (isUpdating) return;
-      isUpdating = true;
 
       const renderFaculty = (f, i) => {
         let div = document.getElementById(`faculty-card-${f.name}`);
-        const isNew = !div;
-        if (isNew) {
+        if (!div) {
           div = document.createElement("div");
-            div.id = `faculty-card-${f.name}`;
-            div.className = "faculty-card";
-            controls.appendChild(div);
+          div.id = `faculty-card-${f.name}`;
+          div.className = "faculty-card";
+          controls.appendChild(div);
+        }
+        // If user is editing this card (focused inside) skip re-render to avoid wiping input mid-selection
+        if (div.contains(document.activeElement) && isEditing && specificIndex === null) {
+          return;
         }
 
         div.innerHTML = "";
         const currentStatus = getStatusString(f);
 
-        // Label + image
+        // Row with image + name + status
+        const topRow = document.createElement("div");
+        topRow.className = "faculty-main-row";
+
+        const label = document.createElement("label");
+        label.style.flex = "0 0 auto";
         const img = document.createElement("img");
         img.src = "https://faculty-status-backend.onrender.com" + f.image;
         img.alt = f.name;
+        label.appendChild(img);
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = f.name;
+        label.appendChild(nameSpan);
 
-        const label = document.createElement("label");
-        label.textContent = f.name;
-        label.prepend(img);
+        const statusWrap = document.createElement("div");
+        statusWrap.className = "status-wrap";
 
-        // Status select
         const selectElement = document.createElement("select");
         selectElement.id = `status-${f.name}`;
         statusOptions.forEach(opt => {
           const option = document.createElement("option");
           option.value = opt;
-          option.textContent = labels[opt];
-            if (opt === currentStatus) option.selected = true;
-            selectElement.appendChild(option);
+            option.textContent = labels[opt];
+          if (opt === currentStatus) option.selected = true;
+          selectElement.appendChild(option);
         });
 
-        // Custom expiry row
+        statusWrap.appendChild(selectElement);
+        topRow.appendChild(label);
+        topRow.appendChild(statusWrap);
+
+        // Clear override button
+        const clearOverrideBtn = document.createElement("button");
+        clearOverrideBtn.type = "button";
+        clearOverrideBtn.className = "override-clear-btn";
+        if (hasValidManualOverride(f)) {
+          clearOverrideBtn.textContent = "Clear Override";
+        } else {
+          clearOverrideBtn.textContent = "Clear Override";
+          clearOverrideBtn.disabled = true;
+        }
+        statusWrap.appendChild(clearOverrideBtn);
+
+        // Expiry row
         const expiryRow = document.createElement("div");
         expiryRow.className = "expiry-row";
 
-        const inlineWrap = document.createElement("div");
-        inlineWrap.className = "inline-datetime";
+        const inputsWrap = document.createElement("div");
+        inputsWrap.className = "expiry-inputs";
 
-        const expiryInput = document.createElement("input");
-        expiryInput.type = "datetime-local";
-        expiryInput.id = `custom-expiry-${f.name}`;
-        expiryInput.value = ""; // do not prefill; user chooses
-        expiryInput.title = "Optional custom expiry date & time";
+        const dateInput = document.createElement("input");
+        dateInput.type = "date";
+        dateInput.id = `exp-date-${f.name}`;
+        const timeInput = document.createElement("input");
+        timeInput.type = "time";
+        timeInput.id = `exp-time-${f.name}`;
 
-        const applyBtn = document.createElement("button");
-        applyBtn.type = "button";
-        applyBtn.className = "mini-btn primary";
-        applyBtn.textContent = "Apply";
-        applyBtn.title = "Apply status (with custom expiry if set)";
+        // Prefill if existing override
+        if (hasValidManualOverride(f)) {
+          const exp = new Date(f.overrideExpiry);
+            if (!isNaN(exp.getTime())) {
+              dateInput.value = exp.toISOString().slice(0,10);
+              timeInput.value = exp.toTimeString().slice(0,5);
+            }
+        }
 
-        const clearBtn = document.createElement("button");
-        clearBtn.type = "button";
-        clearBtn.className = "mini-btn";
-        clearBtn.textContent = "Clear Expiry";
-        clearBtn.title = "Clear custom expiry input";
-        clearBtn.onclick = () => { expiryInput.value = ""; };
-
-        inlineWrap.appendChild(expiryInput);
-        inlineWrap.appendChild(applyBtn);
-        inlineWrap.appendChild(clearBtn);
+        inputsWrap.appendChild(dateInput);
+        inputsWrap.appendChild(timeInput);
 
         const hint = document.createElement("small");
-        hint.textContent = "Leave empty to use default duration.";
+        hint.textContent = "Set date & time or leave blank for default.";
         hint.style.color = "#6b7280";
 
-        expiryRow.appendChild(inlineWrap);
+        expiryRow.appendChild(inputsWrap);
         expiryRow.appendChild(hint);
 
-        // Override indicator
         if (hasValidManualOverride(f)) {
           const ind = document.createElement("span");
           ind.className = "expiry-active-indicator";
-          ind.textContent = `Active override ends in ${getRemainingTime(f.overrideExpiry)}`;
+          ind.textContent = `Ends in ${getRemainingTime(f.overrideExpiry)}`;
           expiryRow.appendChild(ind);
         }
 
-        // Timer button (clear override)
-        const timerBtn = document.createElement("button");
-        timerBtn.id = `timer-btn-${f.name}`;
-        if (hasValidManualOverride(f)) {
-          timerBtn.className = "mini-btn danger";
-          timerBtn.textContent = `Clear override (${getRemainingTime(f.overrideExpiry)})`;
-        } else {
-          timerBtn.className = "mini-btn";
-          timerBtn.textContent = "No manual override";
-          timerBtn.disabled = true;
+        div.appendChild(topRow);
+        div.appendChild(expiryRow);
+
+        // Handlers
+        let expiryChangeDebounce;
+        function scheduleExpiryUpdate() {
+          markEditing();
+          if (!hasValidManualOverride(f)) return; // only update if an override is active
+          clearTimeout(expiryChangeDebounce);
+          expiryChangeDebounce = setTimeout(async () => {
+            const combined = combineDateTime(dateInput.value, timeInput.value);
+            if (!combined) return; // ignore incomplete
+            facultyData[i].overrideExpiry = combined.toISOString();
+            try {
+              await updateFaculty([{ name: f.name, manualOverride: facultyData[i].manualOverride, overrideExpiry: facultyData[i].overrideExpiry }]);
+              showMessage("Expiry updated.");
+              const fresh = await fetchFacultyData();
+              if (fresh) facultyData = fresh;
+              render(i);
+            } catch {
+              showMessage("Failed to update expiry.", true);
+            }
+          }, 700);
         }
 
-        timerBtn.onclick = async () => {
-          if (isUpdating) return;
-          isUpdating = true;
-          showMessage("Clearing manual override...", false, true);
+        dateInput.addEventListener("input", scheduleExpiryUpdate);
+        timeInput.addEventListener("input", scheduleExpiryUpdate);
+
+        selectElement.addEventListener("change", async () => {
+          markEditing();
+          const newValue = selectElement.value;
+          showMessage("Updating status...", false, true);
+          let expiry;
+          // If user has already chosen date or time, use those; else default
+          const combined = combineDateTime(dateInput.value, timeInput.value);
+          expiry = combined || computeDefaultExpiry(newValue);
+          facultyData[i].manualOverride = newValue;
+          facultyData[i].overrideExpiry = expiry.toISOString();
+          try {
+            await updateFaculty([{ name: f.name, manualOverride: newValue, overrideExpiry: expiry.toISOString() }]);
+            const fresh = await fetchFacultyData();
+            if (fresh) facultyData = fresh;
+            showMessage("Status updated.");
+            render(i);
+          } catch {
+            showMessage("Update failed.", true);
+          }
+        });
+
+        clearOverrideBtn.addEventListener("click", async () => {
+          if (clearOverrideBtn.disabled) return;
+          showMessage("Clearing override...", false, true);
           facultyData[i].manualOverride = null;
           facultyData[i].overrideExpiry = null;
           try {
             await updateFaculty([{ name: f.name, manualOverride: null, overrideExpiry: null }]);
-            const freshData = await fetchFacultyData();
-            if (freshData) facultyData = freshData;
-            showMessage("Manual override cleared.");
+            const fresh = await fetchFacultyData();
+            if (fresh) facultyData = fresh;
+            showMessage("Override cleared.");
             render(i);
-          } catch (e) {
-            showMessage("Failed to clear override.", true);
-          } finally {
-            isUpdating = false;
+          } catch {
+            showMessage("Failed to clear.", true);
           }
-        };
+        });
 
-        // Apply handler (single faculty)
-        async function applyStatus() {
-          if (isUpdating) return;
-          isUpdating = true;
-          const newValue = selectElement.value;
-          showMessage("Updating status...", false, true);
-
-          let chosenExpiry = getCustomExpiryValue(expiryInput.value);
-          if (!chosenExpiry) {
-            chosenExpiry = computeDefaultExpiry(newValue);
-          }
-          facultyData[i].manualOverride = newValue;
-          facultyData[i].overrideExpiry = chosenExpiry.toISOString();
-
-          try {
-            await updateFaculty([{ name: f.name, manualOverride: newValue, overrideExpiry: chosenExpiry.toISOString() }]);
-            const freshData = await fetchFacultyData();
-            if (freshData) facultyData = freshData;
-            showMessage("Status updated.");
-            render(i);
-          } catch (err) {
-            showMessage("Failed to update status.", true);
-          } finally {
-            isUpdating = false;
-          }
-        }
-
-        selectElement.addEventListener("change", applyStatus);
-        applyBtn.addEventListener("click", applyStatus);
-
-        div.appendChild(label);
-        div.appendChild(selectElement);
-        div.appendChild(timerBtn);
-        div.appendChild(expiryRow);
-
-        // Interval for override countdown
+        // Countdown updater
         if (hasValidManualOverride(f)) {
-          const intervalId = setInterval(() => {
+          const id = setInterval(() => {
             if (!hasValidManualOverride(facultyData[i])) {
-              clearInterval(intervalId);
+              clearInterval(id);
               render(i);
               return;
             }
-            const btn = document.getElementById(`timer-btn-${f.name}`);
-            if (btn) btn.textContent = `Clear override (${getRemainingTime(facultyData[i].overrideExpiry)})`;
+            const ind = div.querySelector(".expiry-active-indicator");
+            if (ind) ind.textContent = `Ends in ${getRemainingTime(facultyData[i].overrideExpiry)}`;
           }, 1000);
-          timerIntervals.push(intervalId);
+          timerIntervals.push(id);
         }
       };
 
@@ -712,82 +824,55 @@
         if (specificIndex !== null) {
           renderFaculty(facultyData[specificIndex], specificIndex);
         } else {
-          controls.innerHTML = "";
-          facultyData.forEach(renderFaculty);
+          // Full render (skip editing card rebuild handled earlier)
+          facultyData.forEach((f, i) => renderFaculty(f, i));
         }
-        isUpdating = false;
       });
-    }, 80);
+    }, 120);
 
-    /* === Modified bulk update to use optional custom expiry === */
+    /* Bulk status unchanged except pause editing */
     function setStatusForAll(status) {
       if (!status || isUpdating) return;
+      if (isEditing) return; // prevent clash
       isUpdating = true;
       showMessage(`Setting all to ${labels[status]}...`, false, true);
-      const dtVal = document.getElementById('bulkCustomExpiry').value;
-      const useCustom = document.getElementById('bulkUseCustomExpiry').checked;
-      let expiry = null;
-      if (useCustom) {
-        expiry = getCustomExpiryValue(dtVal);
-        if (!expiry) {
-          // Fallback silently if invalid
-          expiry = computeDefaultExpiry(status);
-        }
+      const useCustom = document.getElementById('bulkUseCustomExpiry')?.checked;
+      const dtVal = document.getElementById('bulkCustomExpiry')?.value;
+      let expiry;
+      if (useCustom && dtVal) {
+        const custom = new Date(dtVal);
+        expiry = isNaN(custom.getTime()) ? computeDefaultExpiry(status) : custom;
       } else {
         expiry = computeDefaultExpiry(status);
       }
-
       facultyData.forEach(f => {
         f.manualOverride = status;
         f.overrideExpiry = expiry.toISOString();
       });
       render();
-
       updateFaculty(facultyData.map(f => ({
         name: f.name,
         manualOverride: f.manualOverride,
         overrideExpiry: f.overrideExpiry
-      })))
-        .then(async () => {
-          const freshData = await fetchFacultyData();
-          if (freshData) {
-            facultyData = freshData;
-            render();
-            showMessage(`All set to ${labels[status]}.`);
-          }
-        })
-        .catch(() => showMessage("Bulk update failed.", true))
-        .finally(() => { isUpdating = false; });
-    }
-    function logout() {
-      showMessage("Logging out...", false, true);
-      fetch("https://faculty-status-backend.onrender.com/api/logout", {
-        method: "POST",
-        credentials: "include"
-      })
-        .then(res => {
-          if (res.ok) {
-            setTimeout(() => {
-              window.location.href = "login";
-            }, 300);
-          } else {
-            showMessage("Logout failed.", true);
-          }
-        })
-        .catch(() => showMessage("Logout error.", true));
+      }))).then(async () => {
+        const fresh = await fetchFacultyData();
+        if (fresh) facultyData = fresh;
+        render();
+        showMessage("Bulk updated.");
+      }).catch(() => showMessage("Bulk update failed.", true))
+        .finally(()=> { isUpdating = false; });
     }
 
+    /* Polling: skip while editing */
     function startPolling() {
       setInterval(async () => {
-        if (!isUpdating) {
-          const freshData = await fetchFacultyData();
-          if (freshData) {
-            facultyData = freshData;
-            render();
-            console.log("Polled facultyData:", facultyData);
-          }
+        if (isUpdating || isEditing) return;
+        const fresh = await fetchFacultyData();
+        if (fresh) {
+          facultyData = fresh;
+          render();
         }
-      }, 6000);
+      }, 8000); // slower to reduce disruption
     }
 
     fetchFacultyData()
