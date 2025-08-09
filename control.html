@@ -61,6 +61,24 @@
       gap: 0.5rem;
     }
 
+    .bulk-extra-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      font-size: 0.7rem;
+    }
+
+    .bulk-extra-row input[type=datetime-local] {
+      padding: 0.25rem 0.4rem;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      background: #f3f4f6;
+      font-size: 0.7rem;
+    }
+
+    .bulk-extra-row input[type=datetime-local]:focus { outline: none; border-color: #3b82f6; background: #fff; }
+
     .bulk-status label {
       font-weight: 500;
       color: #374151;
@@ -157,6 +175,56 @@
     .faculty-card button.expiring {
       animation: pulse 1.5s infinite;
     }
+
+    .expiry-toggle {
+      padding: 0.3rem 0.6rem;
+      border-radius: 6px;
+      border: 1px solid #d1d5db;
+      background: #ffffff;
+      font-size: 0.7rem;
+      cursor: pointer;
+      color: #374151;
+    }
+    .expiry-toggle:hover { background: #f3f4f6; }
+
+    .expiry-panel {
+      margin-top: 0.4rem;
+      padding: 0.5rem 0.55rem;
+      border: 1px solid #e5e7eb;
+      background: #f9fafb;
+      border-radius: 6px;
+      display: none;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      font-size: 0.7rem;
+    }
+    .expiry-panel.open { display: flex; }
+    .expiry-panel input[type=date], .expiry-panel input[type=time] {
+      padding: 0.25rem 0.35rem;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      background: #fff;
+      font-size: 0.7rem;
+    }
+    .expiry-panel button.save-expiry {
+      padding: 0.28rem 0.55rem;
+      border-radius: 6px;
+      border: 1px solid #2563eb;
+      background: #2563eb;
+      color: #fff;
+      font-size: 0.7rem;
+      cursor: pointer;
+    }
+    .expiry-panel button.clear-expiry {
+      padding: 0.28rem 0.55rem;
+      border-radius: 6px;
+      border: 1px solid #d1d5db;
+      background: #ffffff;
+      font-size: 0.7rem;
+      cursor: pointer;
+      color: #374151;
+    }
+    .expiry-info { font-size: 0.65rem; color: #6b7280; }
 
     button:disabled {
       opacity: 0.6;
@@ -274,6 +342,13 @@
     <select id="bulkStatus" onchange="setStatusForAll(this.value)">
       <option value="">-- Select Status --</option>
     </select>
+    <div class="bulk-extra-row">
+      <label style="display:flex;align-items:center;gap:0.3rem;">
+        <input type="checkbox" id="bulkUseCustomExpiry"> Custom expiry
+      </label>
+      <input type="datetime-local" id="bulkCustomExpiry" disabled>
+      <span class="expiry-info">Optional – leave unchecked for default duration</span>
+    </div>
   </div>
 
   <div class="controls-container" id="controls"></div>
@@ -433,6 +508,27 @@
       }
     }
 
+    function computeDefaultExpiry(status, now = new Date()) {
+      const expiry = new Date(now);
+      if (["in_class","at_dept","in_meeting"].includes(status)) {
+        expiry.setHours(expiry.getHours() + 1);
+      } else {
+        expiry.setHours(23,59,59,999);
+      }
+      return expiry;
+    }
+
+    function parseCustomDateTime(dateStr, timeStr) {
+      if (!dateStr && !timeStr) return null; // Nothing chosen
+      const today = new Date();
+      const d = dateStr || today.toISOString().slice(0,10);
+      const t = timeStr || today.toTimeString().slice(0,5);
+      const combined = new Date(`${d}T${t}`);
+      if (isNaN(combined.getTime())) return null;
+      if (combined < new Date()) return null; // ignore past
+      return combined;
+    }
+
     const render = debounce((specificIndex = null) => {
       if (isUpdating) {
         console.log("Render skipped due to ongoing update");
@@ -508,24 +604,13 @@
           isUpdating = true;
           showMessage("Updating status...", false, true);
           const newValue = selectElement.value;
+          // Apply default expiry immediately (user may set custom later)
+          const expiry = computeDefaultExpiry(newValue);
           facultyData[i].manualOverride = newValue;
-          const now = new Date();
-          let expiry = new Date(now);
-          if (["in_class", "at_dept", "in_meeting"].includes(newValue)) {
-            expiry.setUTCHours(expiry.getUTCHours() + 1);
-          } else {
-            expiry.setUTCHours(17, 59, 59, 999);
-          }
           facultyData[i].overrideExpiry = expiry.toISOString();
-
           try {
             await updateFaculty([{ name: f.name, manualOverride: newValue, overrideExpiry: expiry.toISOString() }]);
-            const freshData = await fetchFacultyData();
-            if (freshData) {
-              facultyData = freshData;
-              render(i);
-              showMessage("Status updated.");
-            }
+            showMessage("Status updated.");
           } catch (err) {
             showMessage("Failed to update status.", true);
             console.error(err);
@@ -588,9 +673,88 @@
           }
         };
 
+        // Expiry toggle & panel
+        const expiryToggle = document.createElement("button");
+        expiryToggle.type = "button";
+        expiryToggle.className = "expiry-toggle";
+        expiryToggle.textContent = "Expiry";
+        expiryToggle.title = "Set or adjust custom expiry (optional)";
+
+        const expiryPanel = document.createElement("div");
+        expiryPanel.className = "expiry-panel";
+        expiryPanel.innerHTML = `
+          <div style="display:flex;gap:0.4rem;flex-wrap:wrap;align-items:center;">
+            <input type="date" class="exp-date" aria-label="Expiry date">
+            <input type="time" class="exp-time" aria-label="Expiry time">
+            <button type="button" class="save-expiry">Save</button>
+            <button type="button" class="clear-expiry">Clear</button>
+          </div>
+          <div class="expiry-info">Choose date & time then Save. Leaving blank keeps default.</div>
+        `;
+
+        // Prefill date/time if override exists
+        if (hasValidManualOverride(f)) {
+          const exp = new Date(f.overrideExpiry);
+          if (!isNaN(exp.getTime())) {
+            expiryPanel.querySelector('.exp-date').value = exp.toISOString().slice(0,10);
+            expiryPanel.querySelector('.exp-time').value = exp.toTimeString().slice(0,5);
+          }
+        }
+
+        expiryToggle.addEventListener('click', () => {
+          expiryPanel.classList.toggle('open');
+        });
+
+        expiryPanel.querySelector('.save-expiry').addEventListener('click', async () => {
+          if (isUpdating) return;
+            const dateVal = expiryPanel.querySelector('.exp-date').value;
+            const timeVal = expiryPanel.querySelector('.exp-time').value;
+            const custom = parseCustomDateTime(dateVal, timeVal);
+            if (!facultyData[i].manualOverride) {
+              showMessage('Set a status first before custom expiry.', true);
+              return;
+            }
+            if (!custom) {
+              showMessage('Invalid or past date/time.', true);
+              return;
+            }
+            isUpdating = true;
+            showMessage('Updating expiry...', false, true);
+            facultyData[i].overrideExpiry = custom.toISOString();
+            try {
+              await updateFaculty([{ name: f.name, manualOverride: facultyData[i].manualOverride, overrideExpiry: facultyData[i].overrideExpiry }]);
+              showMessage('Expiry updated.');
+            } catch (err) {
+              showMessage('Failed to update expiry.', true);
+              console.error(err);
+            } finally {
+              isUpdating = false;
+            }
+        });
+
+        expiryPanel.querySelector('.clear-expiry').addEventListener('click', async () => {
+          if (isUpdating) return;
+          if (!facultyData[i].manualOverride) { expiryPanel.querySelector('.exp-date').value=''; expiryPanel.querySelector('.exp-time').value=''; return; }
+          isUpdating = true;
+          showMessage('Reverting to default expiry...', false, true);
+          const def = computeDefaultExpiry(facultyData[i].manualOverride);
+          facultyData[i].overrideExpiry = def.toISOString();
+          expiryPanel.querySelector('.exp-date').value = '';
+          expiryPanel.querySelector('.exp-time').value = '';
+          try {
+            await updateFaculty([{ name: f.name, manualOverride: facultyData[i].manualOverride, overrideExpiry: facultyData[i].overrideExpiry }]);
+            showMessage('Default expiry restored.');
+          } catch (err) {
+            showMessage('Failed to restore default.', true);
+            console.error(err);
+          } finally { isUpdating = false; }
+        });
+
         div.appendChild(label);
         div.appendChild(selectElement);
         div.appendChild(timerBtn);
+        div.appendChild(expiryToggle);
+        div.appendChild(expiryPanel);
 
         if (hasValidManualOverride(f)) {
           const intervalId = setInterval(() => {
@@ -715,12 +879,15 @@
       if (!status || isUpdating) return;
       isUpdating = true;
       showMessage(`Setting all faculty to ${labels[status]}...`, false, true);
-      const now = new Date();
-      let expiry = new Date(now);
-      if (["in_class", "at_dept", "in_meeting"].includes(status)) {
-        expiry.setUTCHours(expiry.getUTCHours() + 1);
+      // Bulk custom expiry (optional)
+      let expiry;
+      const bulkChk = document.getElementById('bulkUseCustomExpiry');
+      const bulkDt = document.getElementById('bulkCustomExpiry');
+      if (bulkChk && bulkChk.checked && bulkDt && bulkDt.value) {
+        const custom = new Date(bulkDt.value);
+        expiry = isNaN(custom.getTime()) || custom < new Date() ? computeDefaultExpiry(status) : custom;
       } else {
-        expiry.setUTCHours(17, 59, 59, 999);
+        expiry = computeDefaultExpiry(status);
       }
       facultyData.forEach(f => {
         f.status = status;
@@ -792,6 +959,16 @@
           facultyData = data;
           render();
           startPolling();
+
+          // Enable/disable bulk custom expiry input
+          const bulkChk = document.getElementById('bulkUseCustomExpiry');
+          const bulkDt = document.getElementById('bulkCustomExpiry');
+          if (bulkChk && bulkDt) {
+            bulkChk.addEventListener('change', () => {
+              bulkDt.disabled = !bulkChk.checked;
+              if (!bulkChk.checked) bulkDt.value = '';
+            });
+          }
 
           statusOptions.forEach(opt => {
             const option = document.createElement("option");
