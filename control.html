@@ -260,6 +260,53 @@
         max-width: 200px;
       }
     }
+
+    .calendar-icon {
+      cursor: pointer;
+      display: inline-block;
+      width: 24px;
+      height: 24px;
+      background: url('https://img.icons8.com/ios-filled/50/000000/calendar.png') no-repeat center center;
+      background-size: contain;
+      margin-left: 0.5rem;
+      transition: transform 0.2s;
+    }
+
+    .calendar-icon:hover {
+      transform: scale(1.1);
+    }
+
+    .expiry-panel {
+      display: none;
+      position: absolute;
+      background: white;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      padding: 0.5rem;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      z-index: 10;
+      margin-top: 0.5rem;
+    }
+
+    .expiry-panel.open {
+      display: block;
+    }
+
+    .expiry-panel input {
+      border: 1px solid #d1d5db;
+      border-radius: 4px;
+      padding: 0.25rem;
+      font-size: 0.85rem;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .expiry-panel span {
+      display: block;
+      margin-top: 0.25rem;
+      color: #6b7280;
+      font-size: 0.75rem;
+    }
   </style>
 </head>
 
@@ -490,6 +537,7 @@
         label.style.gap = "0.5rem";
         label.prepend(img);
 
+        // Status select
         const selectElement = document.createElement("select");
         selectElement.id = `status-${f.name}`;
         selectElement.className = "status-selector";
@@ -497,35 +545,73 @@
           const option = document.createElement("option");
           option.value = opt;
           option.textContent = labels[opt];
-          if (opt === currentStatus) {
-            option.selected = true;
-          }
+          if (opt === currentStatus) option.selected = true;
           selectElement.appendChild(option);
         });
+
+        // Calendar icon
+        const calendarIcon = document.createElement("span");
+        calendarIcon.className = "calendar-icon";
+        calendarIcon.title = "Set custom expiry";
+
+        // Expiry panel
+        const expiryPanel = document.createElement("div");
+        expiryPanel.className = "expiry-panel";
+        expiryPanel.innerHTML = `
+          <input type="date" class="exp-date" aria-label="Expiry date">
+          <input type="time" class="exp-time" aria-label="Expiry time">
+          <span style="color:#6b7280;font-size:0.75em;">(Set expiry date/time)</span>
+        `;
+
+        calendarIcon.addEventListener('click', () => {
+          expiryPanel.classList.toggle('open');
+          if (expiryPanel.classList.contains('open')) {
+            pollingPaused = true;
+          } else {
+            pollingPaused = false;
+          }
+        });
+
+        const expiryDate = expiryPanel.querySelector('.exp-date');
+        const expiryTime = expiryPanel.querySelector('.exp-time');
+        function getCustomExpiry(dateStr, timeStr) {
+          if (!dateStr && !timeStr) return null;
+          const now = new Date();
+          let d = dateStr ? dateStr : now.toISOString().slice(0,10);
+          let t = timeStr ? timeStr : now.toTimeString().slice(0,5);
+          const dt = new Date(`${d}T${t}`);
+          if (isNaN(dt.getTime()) || dt < now) return null;
+          return dt;
+        }
+        function updateExpiryIfStatusSelected() {
+          if (!facultyData[i].manualOverride) return;
+          const custom = getCustomExpiry(expiryDate.value, expiryTime.value);
+          if (custom) {
+            facultyData[i].overrideExpiry = custom.toISOString();
+            updateFaculty([{ name: f.name, manualOverride: facultyData[i].manualOverride, overrideExpiry: facultyData[i].overrideExpiry }]);
+            showMessage("Expiry updated.");
+          }
+        }
+        expiryDate.addEventListener("change", updateExpiryIfStatusSelected);
+        expiryTime.addEventListener("change", updateExpiryIfStatusSelected);
 
         selectElement.addEventListener("change", async () => {
           if (isUpdating) return;
           isUpdating = true;
           showMessage("Updating status...", false, true);
           const newValue = selectElement.value;
-          facultyData[i].manualOverride = newValue;
-          const now = new Date();
-          let expiry = new Date(now);
-          if (["in_class", "at_dept", "in_meeting"].includes(newValue)) {
-            expiry.setUTCHours(expiry.getUTCHours() + 1);
+          let expiry;
+          const custom = getCustomExpiry(expiryDate.value, expiryTime.value);
+          if (custom) {
+            expiry = custom;
           } else {
-            expiry.setUTCHours(17, 59, 59, 999);
+            expiry = computeDefaultExpiry(newValue);
           }
+          facultyData[i].manualOverride = newValue;
           facultyData[i].overrideExpiry = expiry.toISOString();
-
           try {
             await updateFaculty([{ name: f.name, manualOverride: newValue, overrideExpiry: expiry.toISOString() }]);
-            const freshData = await fetchFacultyData();
-            if (freshData) {
-              facultyData = freshData;
-              render(i);
-              showMessage("Status updated.");
-            }
+            showMessage("Status updated.");
           } catch (err) {
             showMessage("Failed to update status.", true);
             console.error(err);
@@ -590,7 +676,9 @@
 
         div.appendChild(label);
         div.appendChild(selectElement);
+        div.appendChild(calendarIcon);
         div.appendChild(timerBtn);
+        div.appendChild(expiryPanel);
 
         if (hasValidManualOverride(f)) {
           const intervalId = setInterval(() => {
