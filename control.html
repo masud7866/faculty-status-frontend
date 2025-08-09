@@ -316,11 +316,17 @@
     <button class="logout-btn" onclick="logout()">Logout</button>
   </div>
 
-  <div class="bulk-status">
+  <div class="bulk-status" style="position:relative;">
     <label for="bulkStatus">Set Status for All Faculty:</label>
-    <select id="bulkStatus" onchange="setStatusForAll(this.value)">
+    <select id="bulkStatus">
       <option value="">-- Select Status --</option>
     </select>
+    <span id="bulkCalendar" class="calendar-icon" title="Set bulk custom expiry"></span>
+    <div id="bulkExpiryPanel" class="expiry-panel" style="top:2.5rem;left:0;">
+      <input type="date" id="bulkExpiryDate" aria-label="Bulk expiry date">
+      <input type="time" id="bulkExpiryTime" aria-label="Bulk expiry time">
+      <span style="color:#6b7280;font-size:0.75em;">(Set expiry date/time for all)</span>
+    </div>
   </div>
 
   <div class="controls-container" id="controls"></div>
@@ -799,16 +805,35 @@
       });
     }, 50);
 
-    function setStatusForAll(status) {
+    function getBulkCustomExpiry() {
+      const bulkDate = document.getElementById('bulkExpiryDate');
+      const bulkTime = document.getElementById('bulkExpiryTime');
+      if (!bulkDate || !bulkTime) return null;
+      const now = new Date();
+      let d = bulkDate.value ? bulkDate.value : now.toISOString().slice(0,10);
+      let t = bulkTime.value ? bulkTime.value : now.toTimeString().slice(0,5);
+      const dt = new Date(`${d}T${t}`);
+      if (isNaN(dt.getTime()) || dt < now) return null;
+      return dt;
+    }
+
+    document.getElementById('bulkStatus').addEventListener('change', function() {
+      const status = this.value;
       if (!status || isUpdating) return;
       isUpdating = true;
       showMessage(`Setting all faculty to ${labels[status]}...`, false, true);
-      const now = new Date();
-      let expiry = new Date(now);
-      if (["in_class", "at_dept", "in_meeting"].includes(status)) {
-        expiry.setUTCHours(expiry.getUTCHours() + 1);
+      let expiry;
+      const custom = getBulkCustomExpiry();
+      if (custom) {
+        expiry = custom;
       } else {
-        expiry.setUTCHours(17, 59, 59, 999);
+        const now = new Date();
+        expiry = new Date(now);
+        if (["in_class", "at_dept", "in_meeting"].includes(status)) {
+          expiry.setUTCHours(expiry.getUTCHours() + 1);
+        } else {
+          expiry.setUTCHours(17, 59, 59, 999);
+        }
       }
       facultyData.forEach(f => {
         f.status = status;
@@ -841,7 +866,19 @@
         .finally(() => {
           isUpdating = false;
         });
-    }
+    });
+
+    // Bulk calendar icon logic
+    const bulkCalendar = document.getElementById('bulkCalendar');
+    const bulkExpiryPanel = document.getElementById('bulkExpiryPanel');
+    bulkCalendar.addEventListener('click', () => {
+      bulkExpiryPanel.classList.toggle('open');
+      if (bulkExpiryPanel.classList.contains('open')) {
+        pollingPaused = true;
+      } else {
+        pollingPaused = false;
+      }
+    });
 
     function logout() {
       showMessage("Logging out...", false, true);
