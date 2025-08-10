@@ -244,19 +244,6 @@
         grid-template-rows: auto;
       }
     }
-
-    .extra-info {
-      font-size: 1.6vh;
-      color: #374151;
-      margin-top: 0.2em;
-      display: block;
-      text-align: center;
-    }
-
-    .preposition {
-      font-weight: 600;
-      color: #2563eb;
-    }
   </style>
 </head>
 
@@ -305,7 +292,7 @@
             console.log(f.name, statusStr, room, batch);
             let extraInfo = "";
             if (statusStr === "in_class" && room && batch) {
-              extraInfo = `<small class="extra-info"><span class="preposition">with</span> ${batch} <span class="preposition">at</span> ${room}</small>`;
+              extraInfo = `<small class="text-gray">with ${batch} at ${room}</small>`;
             }
 
             grid.innerHTML += `
