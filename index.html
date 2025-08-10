@@ -1,6 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <style>
+    #screen-size-banner {
+      position: fixed;
+      top: 12px;
+      right: 16px;
+      background: #2563eb;
+      color: #fff;
+      padding: 6px 16px;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      z-index: 9999;
+      box-shadow: 0 2px 8px rgba(16,34,74,.10);
+      opacity: 0.85;
+      pointer-events: none;
+    }
+  </style>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Faculty Whereabouts</title>
@@ -171,6 +188,15 @@
 </head>
 
 <body>
+  <div id="screen-size-banner"></div>
+  <script>
+    function updateScreenSizeBanner() {
+      const banner = document.getElementById('screen-size-banner');
+      banner.textContent = `Screen: ${window.innerWidth} × ${window.innerHeight}`;
+    }
+    window.addEventListener('resize', updateScreenSizeBanner);
+    window.addEventListener('DOMContentLoaded', updateScreenSizeBanner);
+  </script>
   <header>
     <img src="images/ugv_logo.png" alt="UGV Logo" class="logo">
     <div class="header-center">
