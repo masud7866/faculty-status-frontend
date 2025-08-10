@@ -7,58 +7,70 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     body {
-      font-family: 'Inter', Arial, sans-serif;
-      background: #f9fafb;
+      font-family: 'Segoe UI', 'Inter', Arial, sans-serif;
+      background: linear-gradient(135deg, #eef2f7, #dbe5f5);
       margin: 0;
       padding: 0;
+      min-height: 100vh;
       overflow-x: hidden;
-    }
-
-    .header {
-      position: sticky;
-      top: 0;
-      background: white;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      padding: 0.5rem 1rem;
-      z-index: 10;
       display: flex;
-      justify-content: space-between;
+      flex-direction: column;
       align-items: center;
     }
 
+    .header {
+      background: #fff;
+      box-shadow: 0 8px 28px -6px rgba(16,34,74,.10), 0 4px 12px -4px rgba(16,34,74,.10);
+      border-radius: 18px;
+      margin: 2.2rem 0 1.2rem;
+      padding: 1.2rem 2rem 1.2rem;
+      width: 100%;
+      max-width: 900px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+    }
+
     h2 {
-      color: #1f2937;
+      color: #1e3a8a;
       margin: 0;
-      font-size: 1.5rem;
+      font-size: 2rem;
+      font-weight: 600;
+      letter-spacing: .5px;
     }
 
     .logout-btn {
-      padding: 0.5rem 1rem;
-      background-color: #ef4444;
-      color: white;
+      padding: 0.7rem 1.3rem;
+      background: #ef4444;
+      color: #fff;
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
       cursor: pointer;
-      font-size: 0.9rem;
-      transition: background-color 0.2s, transform 0.1s;
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: .5px;
+      box-shadow: 0 2px 8px rgba(16,34,74,.08);
+      transition: background-color 0.18s, transform 0.1s;
     }
-
     .logout-btn:hover {
-      background-color: #dc2626;
+      background: #dc2626;
       transform: translateY(-1px);
     }
 
     .bulk-status {
-      background: white;
-      padding: 0.75rem;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-      margin: 0.75rem;
-      max-width: 100%;
+      background: #fff;
+      padding: 1.2rem 2rem 1.2rem;
+      border-radius: 18px;
+      box-shadow: 0 8px 28px -6px rgba(16,34,74,.10), 0 4px 12px -4px rgba(16,34,74,.10);
+      margin: 0.75rem 0 1.2rem;
+      max-width: 900px;
+      width: 100%;
       box-sizing: border-box;
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
+      gap: 0.7rem;
+      position: relative;
     }
 
     .bulk-status label {
@@ -84,19 +96,27 @@
     .controls-container {
       max-height: calc(100vh - 180px);
       overflow-y: auto;
-      padding: 0 0.75rem;
-      margin-bottom: 1rem;
+      padding: 0 0.75rem 1.5rem;
+      margin-bottom: 0;
+      width: 100%;
+      max-width: 900px;
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+      align-items: stretch;
     }
 
     .faculty-card {
-      background: white;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
-      padding: 0.5rem;
-      margin-bottom: 0.5rem;
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 8px 28px -6px rgba(16,34,74,.10), 0 4px 12px -4px rgba(16,34,74,.10);
+      padding: 1.2rem 2rem 1.2rem;
+      margin-bottom: 0;
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
+      gap: 0.7rem;
+      position: relative;
+      font-size: 1rem;
     }
 
     .faculty-card:nth-child(even) {
@@ -104,56 +124,60 @@
     }
 
     .faculty-card label {
-      font-weight: 500;
-      color: #374151;
+      font-weight: 600;
+      color: #1e3a8a;
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-      font-size: 0.85rem;
+      gap: 0.7rem;
+      font-size: 1.05rem;
+      margin-bottom: 0.2rem;
     }
 
     .faculty-card img {
-      width: 36px;
-      height: 36px;
+      width: 44px;
+      height: 44px;
       border-radius: 50%;
       object-fit: cover;
+      box-shadow: 0 2px 8px rgba(16,34,74,.08);
     }
 
     .faculty-card select {
-      padding: 0.5rem;
-      border-radius: 6px;
-      border: 1px solid #d1d5db;
-      font-size: 0.85rem;
-      background-color: #f3f4f6;
-      transition: border-color 0.2s;
+      padding: 0.7rem 1rem;
+      border-radius: 10px;
+      border: 1.5px solid #cbd5e1;
+      font-size: 1rem;
+      background: #f8fafc;
+      transition: border-color 0.18s, box-shadow 0.18s;
+      font-weight: 500;
     }
 
     .faculty-card select:focus {
-      border-color: #3b82f6;
+      border-color: #2563eb;
       outline: none;
+      box-shadow: 0 0 0 3px rgba(37,99,235,.18);
+      background: #fff;
     }
 
     .faculty-card button {
-      padding: 0.3rem 0.8rem;
-      border-radius: 6px;
-      font-weight: 500;
-      font-size: 0.85rem;
-      border: 1px solid #e5e7eb;
-      background: #f3f4f6;
-      color: #a1a1aa;
-      transition: transform 0.1s;
+      padding: 0.7rem 1.3rem;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 1rem;
+      border: none;
+      background: #f8fafc;
+      color: #374151;
+      box-shadow: 0 2px 8px rgba(16,34,74,.08);
+      transition: background-color 0.18s, transform 0.1s;
     }
-
     .faculty-card button:not(:disabled) {
-      border: 1px solid #fd7e14;
       background: #fff7e6;
       color: #b45309;
+      border: 1.5px solid #fd7e14;
     }
-
     .faculty-card button:not(:disabled):hover {
+      background: #ffe7c2;
       transform: translateY(-1px);
     }
-
     .faculty-card button.expiring {
       animation: pulse 1.5s infinite;
     }
