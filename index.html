@@ -67,7 +67,7 @@
     #clock {
       position: fixed;
       right: 2vw;
-      bottom: 2vh;
+      bottom: 5vh;
       z-index: 1000;
       background: linear-gradient(135deg, #1e3a8a 60%, #2563eb 100%);
       border-radius: 14px;
@@ -270,7 +270,7 @@
             <img src="https://faculty-status-backend.onrender.com${f.image}" alt="${f.name}">
             <h3>${f.name}</h3>
             <div>${f.designation || ""}</div>
-            <div>${f.contact ? `<i class="fa-solid fa-phone"></i> ${f.contact}` : ""}</div>
+            <div>${f.contact ? `<i class="fa-solid fa-phone-volume"></i> ${f.contact}` : ""}</div>
             <div>${f.email ? `<i class="fa-solid fa-envelope"></i> ${f.email}` : ""}</div>
             <div class="status ${statusStr}">
               ${STATUS_MAP[statusStr] || statusStr} ${extraInfo}
