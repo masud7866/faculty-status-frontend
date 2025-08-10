@@ -221,9 +221,11 @@
 
     .icon-phone,
     .icon-email {
-      font-size: 1.2em;
+      width: 1.2em;
+      height: 1.2em;
       vertical-align: middle;
       margin-right: 0.3em;
+      color: #2563eb;
     }
 
     @media (max-width: 1000px) {
@@ -288,8 +290,8 @@
             <img src="https://faculty-status-backend.onrender.com${f.image}" alt="${f.name}">
             <h3>${f.name}</h3>
             <div>${f.designation || ""}</div>
-            <div>${f.contact ? `<span class="icon-phone">&#128222;</span> ${f.contact}` : ""}</div>
-            <div>${f.email ? `<span class="icon-email">&#128231;</span> ${f.email}` : ""}</div>
+            <div>${f.contact ? `<svg class="icon-phone" viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79a15.91 15.91 0 006.59 6.59l2.2-2.2a1 1 0 011.11-.27 11.07 11.07 0 003.48.57 1 1 0 011 1V20a1 1 0 01-1 1A17 17 0 013 4a1 1 0 011-1h3.5a1 1 0 011 1 11.07 11.07 0 00.57 3.48 1 1 0 01-.27 1.11z"/></svg> ${f.contact}` : ""}</div>
+            <div>${f.email ? `<svg class="icon-email" viewBox="0 0 24 24" fill="currentColor"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6" stroke="currentColor" stroke-width="2" fill="none"/></svg> ${f.email}` : ""}</div>
             <div class="status ${statusStr}">
               ${STATUS_MAP[statusStr] || statusStr} ${extraInfo}
             </div>
