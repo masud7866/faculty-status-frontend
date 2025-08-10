@@ -15,8 +15,10 @@
       background: linear-gradient(135deg, #eef2f7, #dbe5f5);
       margin: 0;
       padding: 0;
-      min-height: 100vh;
-      overflow-x: hidden;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
     }
 
     header {
@@ -91,8 +93,10 @@
       gap: 1vh;
       padding: 1vh 2vw;
       box-sizing: border-box;
-      height: calc(100vh - 8vh);
-      /* Remaining height after header */
+      height: calc(100vh - 90px);
+      /* adjust header height as needed */
+      overflow: visible;
+      /* If you use grid-template-rows/columns, ensure it fits 961x541 */
     }
 
     .card {
@@ -135,8 +139,6 @@
     }
 
     .status {
-      background: #2563eb;
-      color: #fff;
       border-radius: 8px;
       padding: 0.2em 0.7em;
       font-size: 1em;
@@ -144,8 +146,46 @@
       display: inline-block;
     }
 
-    .card i {
+    .status.in_class {
+      background: #e0e7ff;
       color: #2563eb;
+      border-radius: 8px;
+      font-weight: 600;
+    }
+
+    .status.at_dept {
+      background: #d1fae5;
+      color: #059669;
+      border-radius: 8px;
+      font-weight: 600;
+    }
+
+    .status.in_meeting {
+      background: #fef3c7;
+      color: #b45309;
+      border-radius: 8px;
+      font-weight: 600;
+    }
+
+    .status.on_leave {
+      background: #fee2e2;
+      color: #dc2626;
+      border-radius: 8px;
+      font-weight: 600;
+    }
+
+    .status.outside {
+      background: #f1f5f9;
+      color: #64748b;
+      border-radius: 8px;
+      font-weight: 600;
+    }
+
+    .status.unknown {
+      background: #e5e7eb;
+      color: #6b7280;
+      border-radius: 8px;
+      font-weight: 600;
     }
 
     ::-webkit-scrollbar {
