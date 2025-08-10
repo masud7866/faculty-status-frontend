@@ -67,7 +67,7 @@
     #clock {
       position: fixed;
       right: 2vw;
-      bottom: 5vh;
+      bottom: 12vh;
       z-index: 1000;
       background: linear-gradient(135deg, #1e3a8a 60%, #2563eb 100%);
       border-radius: 14px;
@@ -84,6 +84,8 @@
       align-items: center;
       justify-content: center;
       user-select: none;
+      min-width: 8em;
+      text-align: center;
     }
 
     @keyframes technoPulse {
@@ -208,6 +210,13 @@
       border-radius: 8px;
     }
 
+    .icon-phone,
+    .icon-email {
+      font-size: 1.2em;
+      vertical-align: middle;
+      margin-right: 0.3em;
+    }
+
     @media (max-width: 1000px) {
       .grid {
         grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -270,8 +279,8 @@
             <img src="https://faculty-status-backend.onrender.com${f.image}" alt="${f.name}">
             <h3>${f.name}</h3>
             <div>${f.designation || ""}</div>
-            <div>${f.contact ? `<i class="fa-solid fa-phone-volume"></i> ${f.contact}` : ""}</div>
-            <div>${f.email ? `<i class="fa-solid fa-envelope"></i> ${f.email}` : ""}</div>
+            <div>${f.contact ? `<span class="icon-phone">&#128222;</span> ${f.contact}` : ""}</div>
+            <div>${f.email ? `<span class="icon-email">&#128231;</span> ${f.email}` : ""}</div>
             <div class="status ${statusStr}">
               ${STATUS_MAP[statusStr] || statusStr} ${extraInfo}
             </div>
