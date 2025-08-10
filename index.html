@@ -8,31 +8,42 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
+    /* Theme-only update: colors, fonts, shadows, rounded corners */
+
     body {
+      font-family: 'Segoe UI', 'Inter', Arial, sans-serif;
+      background: linear-gradient(135deg, #eef2f7, #dbe5f5);
       margin: 0;
       padding: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #f5f7fa;
+      min-height: 100vh;
+      overflow-x: hidden;
     }
 
     header {
+      background: radial-gradient(circle at 60% 40%, #2563eb 0%, #1e3a8a 100%);
+      color: #fff;
+      padding: 0.7em 2vw;
+      border-bottom: 3px solid #2563eb;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0.5vh 2vw;
-      background: radial-gradient(#001947, #2360cb);
-      border-bottom: 3px solid #ccc;
+      border-radius: 0 0 18px 18px;
+      box-shadow: 0 4px 16px -6px rgba(16, 34, 74, .14);
     }
 
     .logo {
       height: 5.5vh;
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(16, 34, 74, .10);
+      border: 2px solid #2563eb;
     }
 
     .header-center {
       text-align: center;
       flex: 1;
-      color: #ffffff;
-      font-family: 'Orbitron', sans-serif;
+      color: #fff;
+      font-family: 'Orbitron', 'Inter', Arial, sans-serif;
     }
 
     .header-center h1 {
@@ -50,14 +61,15 @@
     }
 
     #clock {
-      font-size: 1.8vh;
-      font-family: 'Orbitron', sans-serif;
-      color: #ffffff;
-      white-space: nowrap;
+      font-size: 2vh;
+      font-family: 'Orbitron', 'Inter', Arial, sans-serif;
+      color: #fff;
+      background: #2563ebcc;
+      border-radius: 8px;
+      padding: 0.7vh 1.5vw;
+      box-shadow: 0 2px 8px #0002;
       animation: pulse 1.5s infinite ease-in-out;
-      padding-left: 1vw;
-      width: 10vw;
-      text-align: right;
+      white-space: nowrap;
     }
 
     @keyframes pulse {
@@ -85,10 +97,10 @@
 
     .card {
       background: #fff;
-      border-radius: 1vh;
-      padding: 1.2vh 0.8vh;
-      box-shadow: 0 8px 28px -6px rgba(16, 34, 74, .10), 0 4px 12px -4px rgba(16, 34, 74, .10);
-      text-align: center;
+      border-radius: 18px;
+      box-shadow: 0 8px 28px -6px rgba(16, 34, 74, .14), 0 4px 12px -4px rgba(16, 34, 74, .12);
+      color: #1e3a8a;
+      font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -100,68 +112,50 @@
     }
 
     .card img {
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(16, 34, 74, .10);
+      border: 2px solid #2563eb;
       width: 6vh;
       height: 6vh;
-      border-radius: 50%;
       object-fit: cover;
       margin-bottom: 0.5vh;
     }
 
     .card h3 {
-      margin: 0.3vh 0 0.2vh;
-      font-size: 2vh;
-      font-weight: 600;
-    }
-
-    .card div {
-      margin: 0.3vh 0;
-      line-height: 1.4;
-      font-size: 1.9vh;
-      word-break: break-word;
-      max-width: 95%;
-      overflow-wrap: break-word;
-    }
-
-    .card i {
-      margin-right: 0.5vh;
       color: #2563eb;
+      font-weight: 600;
+      margin-bottom: 0.2em;
+    }
+
+    .card div,
+    .card i,
+    .status {
+      color: #374151;
+      font-weight: 500;
     }
 
     .status {
-      display: inline-block;
-      margin-top: 0.5vh;
-      padding: 0.4vh 0.8vh;
-      border-radius: 10px;
-      color: white;
-      font-weight: bold;
-      font-size: 1.5vh;
-      letter-spacing: 0.3px;
-      font-weight: 600;
+      background: #2563eb;
+      color: #fff;
+      border-radius: 8px;
+      padding: 0.2em 0.7em;
+      font-size: 1em;
       box-shadow: 0 2px 8px rgba(16, 34, 74, .08);
+      display: inline-block;
     }
 
-    .in_class {
-      background-color: #2563eb;
+    .card i {
+      color: #2563eb;
     }
 
-    .at_dept {
-      background-color: #059669;
+    ::-webkit-scrollbar {
+      width: 8px;
+      background: #dbe5f5;
     }
 
-    .on_leave {
-      background-color: #dc2626;
-    }
-
-    .off_duty {
-      background-color: #6c757d;
-    }
-
-    .in_meeting {
-      background-color: #fd7e14;
-    }
-
-    .on_weekend {
-      background-color: #a50101;
+    ::-webkit-scrollbar-thumb {
+      background: #2563eb;
+      border-radius: 8px;
     }
 
     @media (max-width: 1000px) {
