@@ -446,7 +446,8 @@
       "on_leave",
       "off_duty",
       "in_meeting",
-      "on_weekend"
+      "on_weekend",
+      "postponed"
     ];
 
     const labels = {
@@ -455,7 +456,8 @@
       on_leave: "On Leave",
       off_duty: "Off Duty",
       in_meeting: "In Meeting",
-      on_weekend: "On Weekend"
+      on_weekend: "On Weekend",
+      postponed: "Postpone Class"
     };
 
     const controls = document.getElementById('controls');
@@ -667,7 +669,7 @@
           facultyData[i].manualOverride = newValue;
           const now = new Date();
           let expiry = new Date(now);
-          if (["in_class", "at_dept", "in_meeting"].includes(newValue)) {
+          if (["in_class", "at_dept", "in_meeting", "postponed"].includes(newValue)) {
             expiry.setUTCHours(expiry.getUTCHours() + 1);
           } else {
             expiry.setUTCHours(17, 59, 59, 999);
@@ -873,7 +875,7 @@
       showMessage(`Setting all faculty to ${labels[status]}...`, false, true);
       const now = new Date();
       let expiry = new Date(now);
-      if (["in_class", "at_dept", "in_meeting"].includes(status)) {
+      if (["in_class", "at_dept", "in_meeting", "postponed"].includes(status)) {
         expiry.setUTCHours(expiry.getUTCHours() + 1);
       } else {
         expiry.setUTCHours(17, 59, 59, 999);
