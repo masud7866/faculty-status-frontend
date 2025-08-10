@@ -62,27 +62,36 @@
       text-shadow: 1px 1px 2px #00000055;
     }
 
+    /* Techno Clock */
     #clock {
-      font-size: 2vh;
+      position: fixed;
+      right: 3vw;
+      bottom: 2vh;
+      z-index: 1000;
+      background: linear-gradient(135deg, #1e3a8a 60%, #2563eb 100%);
+      border-radius: 18px;
+      padding: 1.2em 2.5em;
+      box-shadow: 0 8px 28px -6px #2563eb88, 0 4px 12px -4px #1e3a8a88;
+      font-size: 3em;
       font-family: 'Orbitron', 'Inter', Arial, sans-serif;
-      color: #fff;
-      background: #2563ebcc;
-      border-radius: 8px;
-      padding: 0.7vh 1.5vw;
-      box-shadow: 0 2px 8px #0002;
-      animation: pulse 1.5s infinite ease-in-out;
-      white-space: nowrap;
+      color: #e0e7ff;
+      text-shadow: 0 0 18px #2563eb, 0 0 8px #60a5fa;
+      letter-spacing: 0.15em;
+      border: 3px solid #60a5fa;
+      animation: technoPulse 1.5s infinite alternate;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
     }
 
-    @keyframes pulse {
-
-      0%,
-      100% {
-        opacity: 1;
+    @keyframes technoPulse {
+      0% {
+        box-shadow: 0 0 24px #2563eb, 0 0 8px #60a5fa;
       }
 
-      50% {
-        opacity: 0.7;
+      100% {
+        box-shadow: 0 0 48px #60a5fa, 0 0 24px #2563eb;
       }
     }
 
@@ -196,6 +205,18 @@
     ::-webkit-scrollbar-thumb {
       background: #2563eb;
       border-radius: 8px;
+    }
+
+    .card .fa-phone {
+      color: #2563eb;
+      font-size: 2.2em;
+      background: #e0e7ff;
+      border-radius: 50%;
+      padding: 0.25em;
+      box-shadow: 0 2px 8px rgba(16, 34, 74, .10);
+      border: 2px solid #2563eb;
+      margin-left: 0.5em;
+      vertical-align: middle;
     }
 
     @media (max-width: 1000px) {
