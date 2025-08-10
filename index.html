@@ -72,12 +72,12 @@
       background: linear-gradient(135deg, #1e3a8a 60%, #2563eb 100%);
       border-radius: 14px;
       padding: 0.7em 1.5em;
-      box-shadow: 0 4px 16px -6px #2563eb88;
+      box-shadow: 0 0 24px #2563eb88, 0 0 8px #60a5fa;
       font-size: 2em;
       font-family: 'Orbitron', 'Inter', Arial, sans-serif;
       color: #e0e7ff;
-      text-shadow: 0 0 8px #2563eb, 0 0 4px #60a5fa;
-      letter-spacing: 0.12em;
+      text-shadow: 0 0 18px #2563eb, 0 0 8px #60a5fa;
+      letter-spacing: 0.18em;
       border: 2px solid #60a5fa;
       animation: technoPulse 1.5s infinite alternate;
       display: flex;
@@ -94,8 +94,17 @@
       }
 
       100% {
-        box-shadow: 0 0 24px #60a5fa, 0 0 12px #2563eb;
+        box-shadow: 0 0 32px #60a5fa, 0 0 18px #2563eb;
       }
+    }
+
+    #clock .ampm {
+      font-size: 0.5em;
+      color: #60a5fa;
+      margin-left: 0.4em;
+      text-shadow: 0 0 8px #60a5fa;
+      font-family: 'Orbitron', 'Inter', Arial, sans-serif;
+      letter-spacing: 0.2em;
     }
 
     .grid {
@@ -186,16 +195,16 @@
       font-weight: 600;
     }
 
-    .status.outside {
-      background: #f1f5f9;
-      color: #64748b;
+    .status.off_duty {
+      background: #f3f4f6;
+      color: #374151;
       border-radius: 8px;
       font-weight: 600;
     }
 
-    .status.unknown {
-      background: #e5e7eb;
-      color: #6b7280;
+    .status.on_weekend {
+      background: #ffe4e6;
+      color: #be123c;
       border-radius: 8px;
       font-weight: 600;
     }
@@ -291,8 +300,15 @@
 
     function updateClock() {
       const now = new Date();
+      let h = now.getHours();
+      const m = String(now.getMinutes()).padStart(2, '0');
+      const s = String(now.getSeconds()).padStart(2, '0');
+      const ampm = h >= 12 ? 'PM' : 'AM';
+      h = h % 12;
+      h = h ? h : 12; // 0 should be 12
+      const timeStr = `${h}:${m}:${s} <span class="ampm">${ampm}</span>`;
       const clock = document.getElementById("clock");
-      clock.textContent = now.toLocaleTimeString([], { hour12: true });
+      clock.innerHTML = timeStr;
     }
 
     loadFaculty();
