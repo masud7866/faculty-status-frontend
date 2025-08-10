@@ -6,6 +6,49 @@
   <title>Faculty Login</title>
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
   <style>
+    /* Responsive adjustments for mobile/tablet */
+    @media (max-width: 600px) {
+      .login-box {
+        padding: 1.2rem 0.7rem 1.2rem;
+        border-radius: 14px;
+        max-width: 98vw;
+      }
+      h2 {
+        font-size: 1.2rem;
+      }
+      .field input, .password-wrapper input {
+        font-size: 1rem;
+        min-height: 44px;
+      }
+      button[type=submit], .toggle-pass {
+        font-size: 1rem;
+        min-height: 44px;
+        min-width: 44px;
+      }
+      .options-row {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: flex-start;
+      }
+    }
+    @media (max-width: 430px) {
+      .login-box {
+        padding: 0.7rem 0.2rem 0.7rem;
+        border-radius: 10px;
+      }
+      h2 {
+        font-size: 1rem;
+      }
+    }
+    /* Accessibility: focus styles, ARIA, contrast */
+    input:focus, button:focus, .toggle-pass:focus {
+      outline: 2px solid #2563eb;
+      outline-offset: 2px;
+      box-shadow: 0 0 0 3px rgba(37,99,235,.18);
+    }
+    button[type=submit], .toggle-pass {
+      touch-action: manipulation;
+    }
     * {
       box-sizing: border-box;
     }
@@ -217,28 +260,28 @@
 <body>
   <div class="login-box" role="form" aria-labelledby="loginTitle">
     <h2 id="loginTitle">Faculty Control Login</h2>
-    <form id="loginForm" novalidate>
+    <form id="loginForm" novalidate aria-label="Login Form">
       <div class="field">
         <label for="username">Username</label>
-        <input autocomplete="username" autofocus id="username" type="text" required aria-required="true" />
+        <input autocomplete="username" autofocus id="username" type="text" required aria-required="true" aria-label="Username" />
       </div>
       <div class="field">
         <label for="password">Password</label>
         <div class="password-wrapper">
-          <input autocomplete="current-password" id="password" type="password" required aria-required="true" />
+          <input autocomplete="current-password" id="password" type="password" required aria-required="true" aria-label="Password" />
           <button type="button" class="toggle-pass" id="togglePass" aria-label="Show password">Show</button>
         </div>
         <div id="capsHint" class="caps-hint">CAPS LOCK IS ON</div>
       </div>
       <div class="options-row">
         <label class="checkbox-group">
-          <input type="checkbox" id="showPassChk" /> <span>Show Password</span>
+          <input type="checkbox" id="showPassChk" aria-label="Show Password" /> <span>Show Password</span>
         </label>
         <label class="checkbox-group">
-          <input type="checkbox" id="rememberChk" /> <span>Remember</span>
+          <input type="checkbox" id="rememberChk" aria-label="Remember Username" /> <span>Remember</span>
         </label>
       </div>
-      <button id="loginBtn" type="submit">
+      <button id="loginBtn" type="submit" aria-label="Login">
         <span id="btnText">Login</span>
       </button>
       <div class="error" id="errorMsg" aria-live="assertive"></div>

@@ -6,6 +6,79 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
+    /* Responsive adjustments for mobile/tablet */
+    @media (max-width: 600px) {
+      .header, .bulk-status, .faculty-card, .controls-container {
+        max-width: 100%;
+        padding: 1rem 0.5rem 1rem;
+        border-radius: 14px;
+      }
+      .header {
+        flex-direction: column;
+        gap: 0.7rem;
+        align-items: stretch;
+      }
+      h2 {
+        font-size: 1.3rem;
+      }
+      .logout-btn {
+        font-size: 1rem;
+        width: 100%;
+        margin-top: 0.5rem;
+      }
+      .bulk-status {
+        flex-direction: column;
+        gap: 0.7rem;
+      }
+      .faculty-card {
+        flex-direction: column;
+        gap: 0.7rem;
+        font-size: 1rem;
+      }
+      .faculty-card label, .faculty-card select, .faculty-card button {
+        width: 100%;
+        font-size: 1rem;
+      }
+      .faculty-card img {
+        width: 38px;
+        height: 38px;
+      }
+      .controls-container {
+        padding: 0.5rem 0.2rem 1rem;
+        gap: 1rem;
+      }
+    }
+
+    @media (max-width: 430px) {
+      .header, .bulk-status, .faculty-card {
+        padding: 0.7rem 0.2rem 0.7rem;
+        border-radius: 10px;
+      }
+      h2 {
+        font-size: 1.1rem;
+      }
+      .faculty-card img {
+        width: 32px;
+        height: 32px;
+      }
+    }
+
+    /* Accessibility: focus styles, ARIA, contrast */
+    .logout-btn:focus, .faculty-card button:focus, .bulk-status button:focus, .faculty-card select:focus {
+      outline: 2px solid #2563eb;
+      outline-offset: 2px;
+      box-shadow: 0 0 0 3px rgba(37,99,235,.18);
+    }
+    .faculty-card button, .bulk-status button, .logout-btn {
+      min-height: 44px;
+      min-width: 44px;
+      touch-action: manipulation;
+    }
+    .faculty-card select, .bulk-status select {
+      min-height: 44px;
+      min-width: 44px;
+      touch-action: manipulation;
+    }
     body {
       font-family: 'Segoe UI', 'Inter', Arial, sans-serif;
       background: linear-gradient(135deg, #eef2f7, #dbe5f5);
@@ -288,19 +361,19 @@
 </head>
 
 <body>
-  <div class="header">
-    <h2>Control Panel</h2>
-    <button class="logout-btn" onclick="logout()">Logout</button>
+  <div class="header" role="banner" aria-label="Faculty Control Panel">
+    <h2 id="panelTitle">Control Panel</h2>
+    <button class="logout-btn" onclick="logout()" aria-label="Logout">Logout</button>
   </div>
 
-  <div class="bulk-status">
-    <label for="bulkStatus">Set Status for All Faculty:</label>
-    <select id="bulkStatus" onchange="setStatusForAll(this.value)">
+  <div class="bulk-status" role="region" aria-labelledby="bulkStatusLabel">
+    <label id="bulkStatusLabel" for="bulkStatus">Set Status for All Faculty:</label>
+    <select id="bulkStatus" onchange="setStatusForAll(this.value)" aria-label="Bulk status selector">
       <option value="">-- Select Status --</option>
     </select>
   </div>
 
-  <div class="controls-container" id="controls"></div>
+  <div class="controls-container" id="controls" role="main" aria-label="Faculty Status Controls"></div>
 
   <script>
     let facultyData = [];
